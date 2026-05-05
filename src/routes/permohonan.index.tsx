@@ -24,6 +24,7 @@ type Row = {
   status: StatusPermohonan;
   tanggal_masuk: string;
   opd: { singkatan: string } | null;
+  catatanAdmin?: string | null;
 };
 
 function ListPage() {
