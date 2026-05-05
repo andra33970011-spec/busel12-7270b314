@@ -144,12 +144,14 @@ function HomePage() {
 
           <motion.div initial={false} className="lg:col-span-5">
             <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-              {stats.map((s) => (
-                <div key={s.label} className="rounded-xl bg-white/10 p-4">
-                  <div className="font-display text-2xl font-bold md:text-3xl">{s.value}</div>
-                  <div className="mt-1 text-xs text-white/80">{s.label}</div>
+              <Suspense fallback={<>{Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-xl bg-white/10 p-4 animate-pulse">
+                  <div className="h-7 w-16 bg-white/20 rounded" />
+                  <div className="mt-2 h-3 w-20 bg-white/15 rounded" />
                 </div>
-              ))}
+              ))}</>}>
+                <StatsGrid />
+              </Suspense>
             </div>
           </motion.div>
         </div>
