@@ -121,6 +121,12 @@ function ListPage() {
                     <td className="px-4 py-3">
                       <div className="font-medium text-foreground">{p.judul}</div>
                       <div className="text-xs text-muted-foreground">{p.kategori}</div>
+                      {(p.status === "selesai" || p.status === "ditolak") && p.catatanAdmin && (
+                        <div className={`mt-2 rounded-md border px-2 py-1.5 text-xs ${p.status === "selesai" ? "border-success/30 bg-success/5 text-success" : "border-destructive/30 bg-destructive/5 text-destructive"}`}>
+                          <span className="font-semibold">Catatan Admin: </span>
+                          <span className="text-foreground/80">{p.catatanAdmin}</span>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-foreground">{p.opd?.singkatan ?? "-"}</td>
                     <td className="px-4 py-3">
