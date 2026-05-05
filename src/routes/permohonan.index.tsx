@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Plus, Inbox } from "lucide-react";
+import { Plus, Inbox, Star, BarChart3 } from "lucide-react";
 import { PageShell, PageHero } from "@/components/site/PageShell";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { STATUS_LABEL, STATUS_TONE, fmtTanggal, type StatusPermohonan } from "@/lib/permohonan";
+import { RatingForm } from "@/components/warga/RatingForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/permohonan/")({
   head: () => ({
@@ -25,6 +27,7 @@ type Row = {
   tanggal_masuk: string;
   opd: { singkatan: string } | null;
   catatanAdmin?: string | null;
+  rating?: { skor: number; komentar: string | null } | null;
 };
 
 function ListPage() {
@@ -32,41 +35,59 @@ function ListPage() {
   const navigate = useNavigate();
   const [items, setItems] = useState<Row[]>([]);
   const [loadingList, setLoadingList] = useState(true);
+  const [openRatingFor, setOpenRatingFor] = useState<Row | null>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
   }, [user, loading, navigate]);
 
-  useEffect(() => {
-    if (!user) return;
+  async function loadData(uid: string) {
     setLoadingList(true);
-    (async () => {
-      const { data } = await supabase
-        .from("permohonan")
-        .select("id, kode, judul, kategori, status, tanggal_masuk, opd:opd_id(singkatan)")
-        .eq("pemohon_id", user.id)
-        .order("tanggal_masuk", { ascending: false });
-      const rows = (data ?? []) as unknown as Row[];
+    const { data } = await supabase
+      .from("permohonan")
+      .select("id, kode, judul, kategori, status, tanggal_masuk, opd:opd_id(singkatan)")
+      .eq("pemohon_id", uid)
+      .order("tanggal_masuk", { ascending: false });
+    const rows = (data ?? []) as unknown as Row[];
 
-      // Ambil catatan admin terbaru untuk permohonan yang sudah selesai/ditolak
-      const finalIds = rows.filter((r) => r.status === "selesai" || r.status === "ditolak").map((r) => r.id);
-      if (finalIds.length > 0) {
-        const { data: rws } = await supabase
+    const finalIds = rows.filter((r) => r.status === "selesai" || r.status === "ditolak").map((r) => r.id);
+    if (finalIds.length > 0) {
+      const [{ data: rws }, { data: rts }] = await Promise.all([
+        supabase
           .from("permohonan_riwayat")
           .select("permohonan_id, catatan, created_at")
           .in("permohonan_id", finalIds)
           .not("catatan", "is", null)
-          .order("created_at", { ascending: false });
-        const latest: Record<string, string> = {};
-        ((rws ?? []) as { permohonan_id: string; catatan: string | null }[]).forEach((r) => {
-          if (r.catatan && !latest[r.permohonan_id]) latest[r.permohonan_id] = r.catatan;
-        });
-        rows.forEach((r) => { r.catatanAdmin = latest[r.id] ?? null; });
-      }
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("permohonan_rating")
+          .select("permohonan_id, skor, komentar")
+          .in("permohonan_id", finalIds)
+          .eq("user_id", uid),
+      ]);
 
-      setItems(rows);
-      setLoadingList(false);
-    })();
+      const latest: Record<string, string> = {};
+      ((rws ?? []) as { permohonan_id: string; catatan: string | null }[]).forEach((r) => {
+        if (r.catatan && !latest[r.permohonan_id]) latest[r.permohonan_id] = r.catatan;
+      });
+      const ratingMap: Record<string, { skor: number; komentar: string | null }> = {};
+      ((rts ?? []) as { permohonan_id: string; skor: number; komentar: string | null }[]).forEach((r) => {
+        ratingMap[r.permohonan_id] = { skor: r.skor, komentar: r.komentar };
+      });
+
+      rows.forEach((r) => {
+        r.catatanAdmin = latest[r.id] ?? null;
+        r.rating = ratingMap[r.id] ?? null;
+      });
+    }
+
+    setItems(rows);
+    setLoadingList(false);
+  }
+
+  useEffect(() => {
+    if (!user) return;
+    loadData(user.id);
   }, [user]);
 
   return (
@@ -104,11 +125,12 @@ function ListPage() {
                   <th className="px-4 py-3 font-medium">OPD</th>
                   <th className="px-4 py-3 font-medium">Status</th>
                   <th className="px-4 py-3 font-medium">Tanggal</th>
+                  <th className="px-4 py-3 font-medium">Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((p) => (
-                  <tr key={p.id} className="border-t border-border hover:bg-surface/60">
+                  <tr key={p.id} className="border-t border-border hover:bg-surface/60 align-top">
                     <td className="px-4 py-3 font-mono text-xs">
                       <Link
                         to="/permohonan/$id"
@@ -127,6 +149,19 @@ function ListPage() {
                           <span className="text-foreground/80">{p.catatanAdmin}</span>
                         </div>
                       )}
+                      {p.status === "selesai" && p.rating && (
+                        <div className="mt-2 rounded-md border border-gold/30 bg-gold/5 p-2 text-xs">
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star key={s} className={`h-3.5 w-3.5 ${s <= p.rating!.skor ? "fill-gold text-gold" : "text-muted-foreground/40"}`} />
+                            ))}
+                            <span className="ml-1 font-medium text-foreground">{p.rating.skor}/5</span>
+                          </div>
+                          {p.rating.komentar && (
+                            <div className="mt-1 italic text-muted-foreground">"{p.rating.komentar}"</div>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-foreground">{p.opd?.singkatan ?? "-"}</td>
                     <td className="px-4 py-3">
@@ -134,14 +169,61 @@ function ListPage() {
                         {STATUS_LABEL[p.status]}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{fmtTanggal(p.tanggal_masuk)}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">{fmtTanggal(p.tanggal_masuk)}</td>
+                    <td className="px-4 py-3">
+                      {p.status === "selesai" && !p.rating && (
+                        <button
+                          type="button"
+                          onClick={() => setOpenRatingFor(p)}
+                          className="inline-flex items-center gap-1 rounded-md bg-gold/10 px-2.5 py-1.5 text-xs font-semibold text-gold-foreground border border-gold/30 hover:bg-gold/20"
+                        >
+                          <Star className="h-3.5 w-3.5" /> Beri Rating
+                        </button>
+                      )}
+                      {p.status === "selesai" && p.rating && (
+                        <Link
+                          to="/kinerja-opd"
+                          className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted"
+                        >
+                          <BarChart3 className="h-3.5 w-3.5" /> Kinerja OPD
+                        </Link>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
+
+        <p className="mt-4 text-xs text-muted-foreground">
+          Rating & ulasan Anda akan diagregasi pada halaman{" "}
+          <Link to="/kinerja-opd" className="font-medium text-primary hover:underline">Kinerja OPD</Link>{" "}
+          sebagai indikator kepuasan layanan publik.
+        </p>
       </section>
+
+      <Dialog open={!!openRatingFor} onOpenChange={(o) => !o && setOpenRatingFor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Beri Rating Layanan</DialogTitle>
+            <DialogDescription>
+              {openRatingFor?.judul} · {openRatingFor?.opd?.singkatan ?? "-"}
+            </DialogDescription>
+          </DialogHeader>
+          {openRatingFor && user && (
+            <RatingForm
+              permohonanId={openRatingFor.id}
+              pemohonId={user.id}
+              sudahRating={false}
+              onRatingSubmit={() => {
+                setOpenRatingFor(null);
+                if (user) loadData(user.id);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </PageShell>
   );
 }
