@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { HomeLayananSkeleton } from "@/components/site/Skeletons";
-import { layananHomeQueryOptions } from "@/lib/queries";
+import { layananHomeQueryOptions, homeStatsQueryOptions } from "@/lib/queries";
 import heroImg from "@/assets/hero-city.jpg";
 
 export const Route = createFileRoute("/")({
