@@ -429,6 +429,41 @@ export type Database = {
           },
         ]
       }
+      permohonan_rating: {
+        Row: {
+          created_at: string
+          id: string
+          komentar: string | null
+          permohonan_id: string
+          skor: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          komentar?: string | null
+          permohonan_id: string
+          skor: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          komentar?: string | null
+          permohonan_id?: string
+          skor?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permohonan_rating_permohonan_id_fkey"
+            columns: ["permohonan_id"]
+            isOneToOne: false
+            referencedRelation: "permohonan"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       permohonan_riwayat: {
         Row: {
           aksi: string
