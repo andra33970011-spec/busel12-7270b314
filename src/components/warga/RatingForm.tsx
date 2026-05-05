@@ -34,7 +34,7 @@ export function RatingForm({ permohonanId, pemohonId, sudahRating, onRatingSubmi
     setLoading(true);
     const { error } = await supabase.from("permohonan_rating").insert({
       permohonan_id: permohonanId,
-      pemohon_id: pemohonId,
+      user_id: pemohonId,
       skor,
       komentar: komentar.trim() || null,
     });
