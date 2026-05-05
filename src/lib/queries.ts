@@ -107,8 +107,8 @@ export const layananAllWithOpdQueryOptions = () =>
       if (error) throw error;
       return (data ?? []) as unknown as LayananWithOpd[];
     },
-    staleTime: FIVE_MIN,
-    gcTime: TEN_MIN,
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
   });
 
 export const layananHomeQueryOptions = () =>
