@@ -24,6 +24,7 @@ type Row = {
   status: StatusPermohonan;
   tanggal_masuk: string;
   opd: { singkatan: string } | null;
+  catatanAdmin?: string | null;
 };
 
 function ListPage() {
@@ -39,15 +40,33 @@ function ListPage() {
   useEffect(() => {
     if (!user) return;
     setLoadingList(true);
-    supabase
-      .from("permohonan")
-      .select("id, kode, judul, kategori, status, tanggal_masuk, opd:opd_id(singkatan)")
-      .eq("pemohon_id", user.id)
-      .order("tanggal_masuk", { ascending: false })
-      .then(({ data }) => {
-        setItems((data ?? []) as unknown as Row[]);
-        setLoadingList(false);
-      });
+    (async () => {
+      const { data } = await supabase
+        .from("permohonan")
+        .select("id, kode, judul, kategori, status, tanggal_masuk, opd:opd_id(singkatan)")
+        .eq("pemohon_id", user.id)
+        .order("tanggal_masuk", { ascending: false });
+      const rows = (data ?? []) as unknown as Row[];
+
+      // Ambil catatan admin terbaru untuk permohonan yang sudah selesai/ditolak
+      const finalIds = rows.filter((r) => r.status === "selesai" || r.status === "ditolak").map((r) => r.id);
+      if (finalIds.length > 0) {
+        const { data: rws } = await supabase
+          .from("permohonan_riwayat")
+          .select("permohonan_id, catatan, created_at")
+          .in("permohonan_id", finalIds)
+          .not("catatan", "is", null)
+          .order("created_at", { ascending: false });
+        const latest: Record<string, string> = {};
+        ((rws ?? []) as { permohonan_id: string; catatan: string | null }[]).forEach((r) => {
+          if (r.catatan && !latest[r.permohonan_id]) latest[r.permohonan_id] = r.catatan;
+        });
+        rows.forEach((r) => { r.catatanAdmin = latest[r.id] ?? null; });
+      }
+
+      setItems(rows);
+      setLoadingList(false);
+    })();
   }, [user]);
 
   return (
@@ -102,6 +121,12 @@ function ListPage() {
                     <td className="px-4 py-3">
                       <div className="font-medium text-foreground">{p.judul}</div>
                       <div className="text-xs text-muted-foreground">{p.kategori}</div>
+                      {(p.status === "selesai" || p.status === "ditolak") && p.catatanAdmin && (
+                        <div className={`mt-2 rounded-md border px-2 py-1.5 text-xs ${p.status === "selesai" ? "border-success/30 bg-success/5 text-success" : "border-destructive/30 bg-destructive/5 text-destructive"}`}>
+                          <span className="font-semibold">Catatan Admin: </span>
+                          <span className="text-foreground/80">{p.catatanAdmin}</span>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-foreground">{p.opd?.singkatan ?? "-"}</td>
                     <td className="px-4 py-3">
