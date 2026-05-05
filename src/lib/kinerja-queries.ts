@@ -20,7 +20,7 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
     .select("id, nama, singkatan");
   if (opdError) throw opdError;
 
-  // 2. Ambil semua permohonan (tanpa join ke layanan_publik)
+  // 2. Ambil semua permohonan dengan tenggat (SLA aktual yang dihitung saat pengajuan)
   const { data: permohonan, error: pError } = await supabase
     .from("permohonan")
     .select(`
@@ -29,25 +29,12 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
       status,
       tanggal_masuk,
       updated_at,
-      kategori
+      tenggat
     `)
     .limit(10000);
   if (pError) throw pError;
 
-  // 3. Ambil kategori_layanan untuk mapping sla_hari berdasarkan nama kategori
-  const { data: kategoriList, error: kError } = await supabase
-    .from("kategori_layanan")
-    .select("nama, sla_hari");
-  if (kError) console.warn("Gagal mengambil kategori_layanan, SLA akan default 14 hari");
-
-  const slaMap = new Map<string, number>();
-  if (kategoriList) {
-    for (const k of kategoriList) {
-      slaMap.set(k.nama, k.sla_hari);
-    }
-  }
-
-  // 4. Ambil semua rating
+  // 3. Ambil semua rating
   const { data: ratings, error: rError } = await supabase
     .from("permohonan_rating")
     .select("permohonan_id, skor");
@@ -62,11 +49,10 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
     }
   }
 
-  // 5. Proses per OPD
+  // 4. Proses per OPD
   const result: OpdKinerja[] = opds.map((opd) => {
     const permohonanOpd = permohonan?.filter((p) => p.opd_id === opd.id) || [];
 
-    // Hitung status
     const status_counts: Record<StatusPermohonan, number> = {
       baru: 0,
       diproses: 0,
@@ -81,17 +67,14 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
     let selesaiDenganSLA = 0;
 
     for (const p of permohonanOpd) {
-      // status
       if (p.status in status_counts) status_counts[p.status as StatusPermohonan]++;
 
-      // rating
       const skor = ratingsMap.get(p.id);
       if (skor) {
         totalRating += skor;
         jumlahRating++;
       }
 
-      // hitung hari selesai (untuk status selesai)
       if (p.status === "selesai" && p.tanggal_masuk && p.updated_at) {
         const ms = new Date(p.updated_at).getTime() - new Date(p.tanggal_masuk).getTime();
         const hari = ms / (1000 * 3600 * 24);
@@ -99,15 +82,13 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
           totalHariSelesai += hari;
           jumlahSelesai++;
 
-          // Ambil sla_hari dari kategori_layanan berdasarkan p.kategori
-          let sla_hari = slaMap.get(p.kategori);
-          if (!sla_hari) {
-            sla_hari = 14; // default jika tidak ditemukan
+          // Tepat waktu = selesai (updated_at) tidak melewati tenggat permohonan
+          if (p.tenggat) {
+            const selesaiTs = new Date(p.updated_at).getTime();
+            const tenggatTs = new Date(p.tenggat).getTime();
+            if (selesaiTs <= tenggatTs) tepatWaktu++;
+            selesaiDenganSLA++;
           }
-          if (hari <= sla_hari) {
-            tepatWaktu++;
-          }
-          selesaiDenganSLA++;
         }
       }
     }
