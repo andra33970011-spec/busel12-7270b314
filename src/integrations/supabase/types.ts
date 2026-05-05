@@ -564,6 +564,111 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_link: {
+        Row: {
+          chat_id: number
+          created_at: string
+          id: string
+          link_code: string | null
+          linked_at: string
+          user_id: string
+          username: string | null
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          id?: string
+          link_code?: string | null
+          linked_at?: string
+          user_id: string
+          username?: string | null
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          id?: string
+          link_code?: string | null
+          linked_at?: string
+          user_id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      telegram_messages: {
+        Row: {
+          chat_id: number
+          created_at: string
+          raw_update: Json
+          text: string | null
+          update_id: number
+          user_id: number | null
+        }
+        Insert: {
+          chat_id: number
+          created_at?: string
+          raw_update: Json
+          text?: string | null
+          update_id: number
+          user_id?: number | null
+        }
+        Update: {
+          chat_id?: number
+          created_at?: string
+          raw_update?: Json
+          text?: string | null
+          update_id?: number
+          user_id?: number | null
+        }
+        Relationships: []
+      }
+      telegram_opd_chat: {
+        Row: {
+          aktif: boolean
+          chat_id: number
+          created_at: string
+          id: string
+          label: string | null
+          opd_id: string
+        }
+        Insert: {
+          aktif?: boolean
+          chat_id: number
+          created_at?: string
+          id?: string
+          label?: string | null
+          opd_id: string
+        }
+        Update: {
+          aktif?: boolean
+          chat_id?: number
+          created_at?: string
+          id?: string
+          label?: string | null
+          opd_id?: string
+        }
+        Relationships: []
+      }
+      telegram_pairing: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

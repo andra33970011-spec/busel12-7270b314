@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { generateKodePermohonan } from "@/lib/permohonan";
 import { logAudit } from "@/lib/audit";
+import { notifyPermohonanBaru } from "@/server/telegram.functions";
 
 type BaruSearch = { layanan?: string };
 
@@ -182,6 +183,9 @@ function BaruPage() {
       }
 
       await logAudit({ aksi: "permohonan.created", entitas: "permohonan", entitas_id: row.id });
+
+      // Notifikasi Telegram ke admin OPD (best-effort, jangan blokir UX)
+      notifyPermohonanBaru({ data: { permohonanId: row.id } }).catch((e) => console.warn("TG notify gagal", e));
 
       toast.success(`Permohonan ${kode} berhasil diajukan`);
       navigate({ to: "/permohonan" });
