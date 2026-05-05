@@ -40,15 +40,33 @@ function ListPage() {
   useEffect(() => {
     if (!user) return;
     setLoadingList(true);
-    supabase
-      .from("permohonan")
-      .select("id, kode, judul, kategori, status, tanggal_masuk, opd:opd_id(singkatan)")
-      .eq("pemohon_id", user.id)
-      .order("tanggal_masuk", { ascending: false })
-      .then(({ data }) => {
-        setItems((data ?? []) as unknown as Row[]);
-        setLoadingList(false);
-      });
+    (async () => {
+      const { data } = await supabase
+        .from("permohonan")
+        .select("id, kode, judul, kategori, status, tanggal_masuk, opd:opd_id(singkatan)")
+        .eq("pemohon_id", user.id)
+        .order("tanggal_masuk", { ascending: false });
+      const rows = (data ?? []) as unknown as Row[];
+
+      // Ambil catatan admin terbaru untuk permohonan yang sudah selesai/ditolak
+      const finalIds = rows.filter((r) => r.status === "selesai" || r.status === "ditolak").map((r) => r.id);
+      if (finalIds.length > 0) {
+        const { data: rws } = await supabase
+          .from("permohonan_riwayat")
+          .select("permohonan_id, catatan, created_at")
+          .in("permohonan_id", finalIds)
+          .not("catatan", "is", null)
+          .order("created_at", { ascending: false });
+        const latest: Record<string, string> = {};
+        ((rws ?? []) as { permohonan_id: string; catatan: string | null }[]).forEach((r) => {
+          if (r.catatan && !latest[r.permohonan_id]) latest[r.permohonan_id] = r.catatan;
+        });
+        rows.forEach((r) => { r.catatanAdmin = latest[r.id] ?? null; });
+      }
+
+      setItems(rows);
+      setLoadingList(false);
+    })();
   }, [user]);
 
   return (
