@@ -438,7 +438,7 @@ function AdminDashboard() {
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">{fmtTanggal(p.tanggal_masuk)}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link to="/admin/permohonan/$id" params={{ id: p.id }} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+                    <Link to="/permohonan/$id" params={{ id: p.id }} className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
                       Detail <ArrowUpRight className="h-3 w-3" />
                     </Link>
                   </td>
