@@ -85,6 +85,32 @@ export const homeStatsQueryOptions = () =>
     gcTime: 10 * 60_000,
   });
 
+export type LayananWithOpd = {
+  id: string;
+  judul: string;
+  slug: string;
+  deskripsi: string | null;
+  sla_hari: number;
+  urutan: number;
+  opd: { id: string; singkatan: string; nama: string; kategori: string[] } | null;
+};
+
+export const layananAllWithOpdQueryOptions = () =>
+  queryOptions({
+    queryKey: ["layanan", "all-with-opd"],
+    queryFn: async (): Promise<LayananWithOpd[]> => {
+      const { data, error } = await supabase
+        .from("layanan_publik")
+        .select("id,judul,slug,deskripsi,sla_hari,urutan,opd:opd_id(id,singkatan,nama,kategori)")
+        .eq("aktif", true)
+        .order("urutan");
+      if (error) throw error;
+      return (data ?? []) as unknown as LayananWithOpd[];
+    },
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+  });
+
 export const layananHomeQueryOptions = () =>
   queryOptions({
     queryKey: ["layanan", "home-top"],
