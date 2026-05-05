@@ -25,6 +25,7 @@ import { Route as PermohonanIdRouteImport } from './routes/permohonan.$id'
 import { Route as LayananSlugRouteImport } from './routes/layanan.$slug'
 import { Route as InstansiSingkatanRouteImport } from './routes/instansi.$singkatan'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminTelegramRouteImport } from './routes/admin.telegram'
 import { Route as AdminStorageRouteImport } from './routes/admin.storage'
 import { Route as AdminPejabatRouteImport } from './routes/admin.pejabat'
 import { Route as AdminOpdRouteImport } from './routes/admin.opd'
@@ -115,6 +116,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTelegramRoute = AdminTelegramRouteImport.update({
+  id: '/admin/telegram',
+  path: '/admin/telegram',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminStorageRoute = AdminStorageRouteImport.update({
   id: '/admin/storage',
   path: '/admin/storage',
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
   '/admin/storage': typeof AdminStorageRoute
+  '/admin/telegram': typeof AdminTelegramRoute
   '/admin/users': typeof AdminUsersRoute
   '/instansi/$singkatan': typeof InstansiSingkatanRoute
   '/layanan/$slug': typeof LayananSlugRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
   '/admin/storage': typeof AdminStorageRoute
+  '/admin/telegram': typeof AdminTelegramRoute
   '/admin/users': typeof AdminUsersRoute
   '/instansi/$singkatan': typeof InstansiSingkatanRoute
   '/layanan/$slug': typeof LayananSlugRoute
@@ -235,6 +243,7 @@ export interface FileRoutesById {
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
   '/admin/storage': typeof AdminStorageRoute
+  '/admin/telegram': typeof AdminTelegramRoute
   '/admin/users': typeof AdminUsersRoute
   '/instansi/$singkatan': typeof InstansiSingkatanRoute
   '/layanan/$slug': typeof LayananSlugRoute
@@ -264,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin/opd'
     | '/admin/pejabat'
     | '/admin/storage'
+    | '/admin/telegram'
     | '/admin/users'
     | '/instansi/$singkatan'
     | '/layanan/$slug'
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/admin/opd'
     | '/admin/pejabat'
     | '/admin/storage'
+    | '/admin/telegram'
     | '/admin/users'
     | '/instansi/$singkatan'
     | '/layanan/$slug'
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/admin/opd'
     | '/admin/pejabat'
     | '/admin/storage'
+    | '/admin/telegram'
     | '/admin/users'
     | '/instansi/$singkatan'
     | '/layanan/$slug'
@@ -346,6 +358,7 @@ export interface RootRouteChildren {
   AdminOpdRoute: typeof AdminOpdRoute
   AdminPejabatRoute: typeof AdminPejabatRoute
   AdminStorageRoute: typeof AdminStorageRoute
+  AdminTelegramRoute: typeof AdminTelegramRoute
   AdminUsersRoute: typeof AdminUsersRoute
   InstansiSingkatanRoute: typeof InstansiSingkatanRoute
   PermohonanIdRoute: typeof PermohonanIdRoute
@@ -469,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/telegram': {
+      id: '/admin/telegram'
+      path: '/admin/telegram'
+      fullPath: '/admin/telegram'
+      preLoaderRoute: typeof AdminTelegramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/storage': {
       id: '/admin/storage'
       path: '/admin/storage'
@@ -564,6 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminOpdRoute: AdminOpdRoute,
   AdminPejabatRoute: AdminPejabatRoute,
   AdminStorageRoute: AdminStorageRoute,
+  AdminTelegramRoute: AdminTelegramRoute,
   AdminUsersRoute: AdminUsersRoute,
   InstansiSingkatanRoute: InstansiSingkatanRoute,
   PermohonanIdRoute: PermohonanIdRoute,
