@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { STATUS_LABEL, STATUS_TONE, fmtDateTime, type StatusPermohonan } from "@/lib/permohonan";
 import { logAudit } from "@/lib/audit";
+import { notifyStatusChange } from "@/server/telegram.functions";
 
 export const Route = createFileRoute("/permohonan/$id")({
   head: ({ params }) => ({
@@ -150,6 +151,11 @@ function DetailPermohonan() {
         data_sebelum: { status: oldStatus },
         data_sesudah: { status: statusBaru, catatan: catatanStatus || null },
       });
+
+      // Notifikasi Telegram ke pemohon (best-effort)
+      if (oldStatus !== statusBaru) {
+        notifyStatusChange({ data: { permohonanId: item.id, catatan: catatanStatus || undefined } }).catch((e) => console.warn("TG notify gagal", e));
+      }
 
       setCatatanStatus("");
       toast.success("Status diperbarui");
