@@ -48,6 +48,43 @@ export type LayananRingkas = {
   persyaratan?: string | null;
 };
 
+export type HomeStats = {
+  layananOnline: number;
+  permohonanBulanIni: number;
+  datasetTerbuka: number;
+  kepuasanPersen: number | null;
+};
+
+export const homeStatsQueryOptions = () =>
+  queryOptions({
+    queryKey: ["home", "stats"],
+    queryFn: async (): Promise<HomeStats> => {
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+
+      const [layananRes, permohonanRes, datasetRes, ratingRes] = await Promise.all([
+        supabase.from("layanan_publik").select("*", { count: "exact", head: true }).eq("aktif", true),
+        supabase.from("permohonan").select("*", { count: "exact", head: true }).gte("tanggal_masuk", startOfMonth.toISOString()),
+        supabase.from("data_terpadu_item").select("*", { count: "exact", head: true }).eq("aktif", true),
+        supabase.from("permohonan_rating").select("skor"),
+      ]);
+
+      const ratings = (ratingRes.data ?? []) as { skor: number }[];
+      const avg = ratings.length > 0 ? ratings.reduce((s, r) => s + r.skor, 0) / ratings.length : null;
+      const kepuasanPersen = avg !== null ? (avg / 5) * 100 : null;
+
+      return {
+        layananOnline: layananRes.count ?? 0,
+        permohonanBulanIni: permohonanRes.count ?? 0,
+        datasetTerbuka: datasetRes.count ?? 0,
+        kepuasanPersen,
+      };
+    },
+    staleTime: 2 * 60_000,
+    gcTime: 10 * 60_000,
+  });
+
 export const layananHomeQueryOptions = () =>
   queryOptions({
     queryKey: ["layanan", "home-top"],

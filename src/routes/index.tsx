@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { HomeLayananSkeleton } from "@/components/site/Skeletons";
-import { layananHomeQueryOptions } from "@/lib/queries";
+import { layananHomeQueryOptions, homeStatsQueryOptions } from "@/lib/queries";
 import heroImg from "@/assets/hero-city.jpg";
 
 export const Route = createFileRoute("/")({
@@ -20,18 +20,37 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: ({ context: { queryClient } }) => {
-    // Prefetch tanpa await agar hero langsung tampil; data layanan stream via Suspense
     queryClient.prefetchQuery(layananHomeQueryOptions());
+    queryClient.prefetchQuery(homeStatsQueryOptions());
   },
   component: HomePage,
 });
 
-const stats = [
-  { label: "Layanan Online", value: "127" },
-  { label: "Permohonan/bulan", value: "48.2K" },
-  { label: "Dataset Terbuka", value: "312" },
-  { label: "Kepuasan Warga", value: "94%" },
-];
+function formatNumber(n: number): string {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
+  return n.toLocaleString("id-ID");
+}
+
+function StatsGrid() {
+  const { data } = useSuspenseQuery(homeStatsQueryOptions());
+  const stats = [
+    { label: "Layanan Online", value: formatNumber(data.layananOnline) },
+    { label: "Permohonan/bulan", value: formatNumber(data.permohonanBulanIni) },
+    { label: "Dataset Terbuka", value: formatNumber(data.datasetTerbuka) },
+    { label: "Kepuasan Warga", value: data.kepuasanPersen !== null ? `${data.kepuasanPersen.toFixed(0)}%` : "—" },
+  ];
+  return (
+    <>
+      {stats.map((s) => (
+        <div key={s.label} className="rounded-xl bg-white/10 p-4">
+          <div className="font-display text-2xl font-bold md:text-3xl">{s.value}</div>
+          <div className="mt-1 text-xs text-white/80">{s.label}</div>
+        </div>
+      ))}
+    </>
+  );
+}
 
 function LayananGrid() {
   const { data: layanan } = useSuspenseQuery(layananHomeQueryOptions());
@@ -125,12 +144,14 @@ function HomePage() {
 
           <motion.div initial={false} className="lg:col-span-5">
             <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
-              {stats.map((s) => (
-                <div key={s.label} className="rounded-xl bg-white/10 p-4">
-                  <div className="font-display text-2xl font-bold md:text-3xl">{s.value}</div>
-                  <div className="mt-1 text-xs text-white/80">{s.label}</div>
+              <Suspense fallback={<>{Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="rounded-xl bg-white/10 p-4 animate-pulse">
+                  <div className="h-7 w-16 bg-white/20 rounded" />
+                  <div className="mt-2 h-3 w-20 bg-white/15 rounded" />
                 </div>
-              ))}
+              ))}</>}>
+                <StatsGrid />
+              </Suspense>
             </div>
           </motion.div>
         </div>
