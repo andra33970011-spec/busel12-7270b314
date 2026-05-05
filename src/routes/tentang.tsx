@@ -91,7 +91,7 @@ function TentangPage() {
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>• WTP — BPK RI (8 tahun berturut-turut)</li>
               <li>• Smart City Award 2025</li>
-              <li>• Open Data Index Tertinggi Jawa</li>
+              <li>• Open Data Index Tertinggi Sulawesi Tenggara</li>
               <li>• Penghargaan Pelayanan Prima — Kemenpan RB</li>
             </ul>
           </div>
