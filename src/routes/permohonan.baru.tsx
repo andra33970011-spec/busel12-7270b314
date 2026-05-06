@@ -36,8 +36,8 @@ const formSchema = z.object({
   prioritas: z.enum(["rendah", "normal", "tinggi"]),
 });
 
-const MAX_FILES = 5;
-const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_FILES = 10;
+const MAX_FILE_BYTES = 1 * 1024 * 1024; // 1 MB
 const ALLOWED_MIME = new Set([
   "application/pdf",
   "image/jpeg",
@@ -119,7 +119,7 @@ function BaruPage() {
     for (const f of [...files, ...list]) {
       if (next.length >= MAX_FILES) break;
       if (f.size > MAX_FILE_BYTES) {
-        toast.error(`${f.name} melebihi 5 MB`);
+        toast.error(`${f.name} melebihi 1 MB`);
         continue;
       }
       if (!ALLOWED_MIME.has(f.type)) {
@@ -302,7 +302,7 @@ function BaruPage() {
             </div>
           </Field>
 
-          <Field label={`Berkas Pendukung (maks ${MAX_FILES} file, 5 MB / file)`}>
+          <Field label={`Berkas Pendukung (maks ${MAX_FILES} file, 1 MB / file)`}>
             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed border-border bg-background p-6 text-sm text-muted-foreground hover:bg-muted">
               <Upload className="h-4 w-4" />
               Klik untuk pilih berkas
