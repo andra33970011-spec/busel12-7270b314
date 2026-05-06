@@ -80,8 +80,8 @@ export function Header() {
         <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 lg:flex-initial">
           <img src={lambang} alt="Lambang" width={40} height={40} className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
           <div className="leading-tight min-w-0">
-            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-sans truncate">PEMERINTAH KABUPATEN</div>
-            <div className="font-display text-sm sm:text-base font-bold text-foreground truncate">BUTON SELATAN</div>
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-sans whitespace-nowrap">PEMERINTAH KABUPATEN</div>
+            <div className="font-display text-sm sm:text-base font-bold text-foreground whitespace-nowrap">BUTON SELATAN</div>
           </div>
         </Link>
 
@@ -160,12 +160,12 @@ export function Header() {
           {user ? (
             <Link
               to="/permohonan"
-              className="md:hidden inline-flex h-10 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs font-semibold text-foreground"
+              aria-label={displayName}
+              className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-xs font-semibold text-foreground shrink-0"
             >
-              <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-primary text-[11px] font-bold text-primary-foreground">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-primary text-[12px] font-bold text-primary-foreground">
                 {displayName.charAt(0).toUpperCase()}
               </span>
-              <span className="max-w-[80px] truncate">{displayName}</span>
             </Link>
           ) : (
             <Link
