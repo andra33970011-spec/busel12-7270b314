@@ -122,7 +122,7 @@ function LayananDetailPage() {
 
                 <div className="mt-5 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
                   Format yang diterima: <span className="font-medium">PDF, JPG, PNG, WebP</span> · maksimal
-                  <span className="font-medium"> 5 MB</span> per berkas, hingga 5 berkas.
+                  <span className="font-medium"> 1 MB</span> per berkas, hingga 10 berkas.
                 </div>
               </article>
 
