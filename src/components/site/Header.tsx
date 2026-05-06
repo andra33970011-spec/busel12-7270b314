@@ -80,8 +80,8 @@ export function Header() {
         <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 lg:flex-initial">
           <img src={lambang} alt="Lambang" width={40} height={40} className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
           <div className="leading-tight min-w-0">
-            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-sans truncate">PEMERINTAH KABUPATEN</div>
-            <div className="font-display text-sm sm:text-base font-bold text-foreground truncate">BUTON SELATAN</div>
+            <div className="text-[9px] sm:text-[10px] uppercase tracking-widest text-muted-foreground font-sans whitespace-nowrap">PEMERINTAH KABUPATEN</div>
+            <div className="font-display text-sm sm:text-base font-bold text-foreground whitespace-nowrap">BUTON SELATAN</div>
           </div>
         </Link>
 
