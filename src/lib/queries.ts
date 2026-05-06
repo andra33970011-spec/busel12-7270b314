@@ -76,7 +76,7 @@ export const homeStatsQueryOptions = () =>
 
       return {
         layananOnline: layananRes.count ?? 0,
-        permohonanBulanIni: permohonanRes.count ?? 0,
+        permohonanBulanIni: (permohonanRes.data as number | null) ?? 0,
         datasetTerbuka: datasetRes.count ?? 0,
         kepuasanPersen,
       };
