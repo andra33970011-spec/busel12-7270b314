@@ -695,6 +695,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      count_permohonan_bulan_ini: { Args: never; Returns: number }
       get_user_opd: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {

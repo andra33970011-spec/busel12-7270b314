@@ -65,7 +65,7 @@ export const homeStatsQueryOptions = () =>
 
       const [layananRes, permohonanRes, datasetRes, ratingRes] = await Promise.all([
         supabase.from("layanan_publik").select("*", { count: "exact", head: true }).eq("aktif", true),
-        supabase.from("permohonan").select("*", { count: "exact", head: true }).gte("tanggal_masuk", startOfMonth.toISOString()),
+        supabase.rpc("count_permohonan_bulan_ini"),
         supabase.from("data_terpadu_item").select("*", { count: "exact", head: true }).eq("aktif", true),
         supabase.from("permohonan_rating").select("skor"),
       ]);
@@ -76,7 +76,7 @@ export const homeStatsQueryOptions = () =>
 
       return {
         layananOnline: layananRes.count ?? 0,
-        permohonanBulanIni: permohonanRes.count ?? 0,
+        permohonanBulanIni: (permohonanRes.data as number | null) ?? 0,
         datasetTerbuka: datasetRes.count ?? 0,
         kepuasanPersen,
       };
