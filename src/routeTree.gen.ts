@@ -102,9 +102,9 @@ const PermohonanIdRoute = PermohonanIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayananSlugRoute = LayananSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => LayananRoute,
+  id: '/layanan/$slug',
+  path: '/layanan/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const InstansiSingkatanRoute = InstansiSingkatanRouteImport.update({
   id: '/instansi/$singkatan',
@@ -360,6 +360,7 @@ export interface RootRouteChildren {
   AdminTelegramRoute: typeof AdminTelegramRoute
   AdminUsersRoute: typeof AdminUsersRoute
   InstansiSingkatanRoute: typeof InstansiSingkatanRoute
+  LayananSlugRoute: typeof LayananSlugRoute
   PermohonanIdRoute: typeof PermohonanIdRoute
   PermohonanBaruRoute: typeof PermohonanBaruRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -463,10 +464,10 @@ declare module '@tanstack/react-router' {
     }
     '/layanan/$slug': {
       id: '/layanan/$slug'
-      path: '/$slug'
+      path: '/layanan/$slug'
       fullPath: '/layanan/$slug'
       preLoaderRoute: typeof LayananSlugRouteImport
-      parentRoute: typeof LayananRoute
+      parentRoute: typeof rootRouteImport
     }
     '/instansi/$singkatan': {
       id: '/instansi/$singkatan'
@@ -575,6 +576,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTelegramRoute: AdminTelegramRoute,
   AdminUsersRoute: AdminUsersRoute,
   InstansiSingkatanRoute: InstansiSingkatanRoute,
+  LayananSlugRoute: LayananSlugRoute,
   PermohonanIdRoute: PermohonanIdRoute,
   PermohonanBaruRoute: PermohonanBaruRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -585,12 +587,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
