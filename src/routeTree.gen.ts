@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TentangRouteImport } from './routes/tentang'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LayananRouteImport } from './routes/layanan'
 import { Route as KontakRouteImport } from './routes/kontak'
 import { Route as KinerjaOpdRouteImport } from './routes/kinerja-opd'
 import { Route as DataRouteImport } from './routes/data'
@@ -19,6 +18,7 @@ import { Route as BeritaRouteImport } from './routes/berita'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PermohonanIndexRouteImport } from './routes/permohonan.index'
+import { Route as LayananIndexRouteImport } from './routes/layanan.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PermohonanBaruRouteImport } from './routes/permohonan.baru'
 import { Route as PermohonanIdRouteImport } from './routes/permohonan.$id'
@@ -44,11 +44,6 @@ const TentangRoute = TentangRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LayananRoute = LayananRouteImport.update({
-  id: '/layanan',
-  path: '/layanan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KontakRoute = KontakRouteImport.update({
@@ -84,6 +79,11 @@ const IndexRoute = IndexRouteImport.update({
 const PermohonanIndexRoute = PermohonanIndexRouteImport.update({
   id: '/permohonan/',
   path: '/permohonan/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LayananIndexRoute = LayananIndexRouteImport.update({
+  id: '/layanan/',
+  path: '/layanan/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -175,7 +175,6 @@ export interface FileRoutesByFullPath {
   '/data': typeof DataRoute
   '/kinerja-opd': typeof KinerjaOpdRoute
   '/kontak': typeof KontakRoute
-  '/layanan': typeof LayananRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/tentang': typeof TentangRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -193,6 +192,7 @@ export interface FileRoutesByFullPath {
   '/permohonan/$id': typeof PermohonanIdRoute
   '/permohonan/baru': typeof PermohonanBaruRoute
   '/admin/': typeof AdminIndexRoute
+  '/layanan/': typeof LayananIndexRoute
   '/permohonan/': typeof PermohonanIndexRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
@@ -203,7 +203,6 @@ export interface FileRoutesByTo {
   '/data': typeof DataRoute
   '/kinerja-opd': typeof KinerjaOpdRoute
   '/kontak': typeof KontakRoute
-  '/layanan': typeof LayananRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/tentang': typeof TentangRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -221,6 +220,7 @@ export interface FileRoutesByTo {
   '/permohonan/$id': typeof PermohonanIdRoute
   '/permohonan/baru': typeof PermohonanBaruRoute
   '/admin': typeof AdminIndexRoute
+  '/layanan': typeof LayananIndexRoute
   '/permohonan': typeof PermohonanIndexRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
@@ -232,7 +232,6 @@ export interface FileRoutesById {
   '/data': typeof DataRoute
   '/kinerja-opd': typeof KinerjaOpdRoute
   '/kontak': typeof KontakRoute
-  '/layanan': typeof LayananRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/tentang': typeof TentangRoute
   '/admin/audit': typeof AdminAuditRoute
@@ -250,6 +249,7 @@ export interface FileRoutesById {
   '/permohonan/$id': typeof PermohonanIdRoute
   '/permohonan/baru': typeof PermohonanBaruRoute
   '/admin/': typeof AdminIndexRoute
+  '/layanan/': typeof LayananIndexRoute
   '/permohonan/': typeof PermohonanIndexRoute
   '/api/public/telegram/webhook': typeof ApiPublicTelegramWebhookRoute
 }
@@ -262,7 +262,6 @@ export interface FileRouteTypes {
     | '/data'
     | '/kinerja-opd'
     | '/kontak'
-    | '/layanan'
     | '/reset-password'
     | '/tentang'
     | '/admin/audit'
@@ -280,6 +279,7 @@ export interface FileRouteTypes {
     | '/permohonan/$id'
     | '/permohonan/baru'
     | '/admin/'
+    | '/layanan/'
     | '/permohonan/'
     | '/api/public/telegram/webhook'
   fileRoutesByTo: FileRoutesByTo
@@ -290,7 +290,6 @@ export interface FileRouteTypes {
     | '/data'
     | '/kinerja-opd'
     | '/kontak'
-    | '/layanan'
     | '/reset-password'
     | '/tentang'
     | '/admin/audit'
@@ -308,6 +307,7 @@ export interface FileRouteTypes {
     | '/permohonan/$id'
     | '/permohonan/baru'
     | '/admin'
+    | '/layanan'
     | '/permohonan'
     | '/api/public/telegram/webhook'
   id:
@@ -318,7 +318,6 @@ export interface FileRouteTypes {
     | '/data'
     | '/kinerja-opd'
     | '/kontak'
-    | '/layanan'
     | '/reset-password'
     | '/tentang'
     | '/admin/audit'
@@ -336,6 +335,7 @@ export interface FileRouteTypes {
     | '/permohonan/$id'
     | '/permohonan/baru'
     | '/admin/'
+    | '/layanan/'
     | '/permohonan/'
     | '/api/public/telegram/webhook'
   fileRoutesById: FileRoutesById
@@ -347,7 +347,6 @@ export interface RootRouteChildren {
   DataRoute: typeof DataRoute
   KinerjaOpdRoute: typeof KinerjaOpdRoute
   KontakRoute: typeof KontakRoute
-  LayananRoute: typeof LayananRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   TentangRoute: typeof TentangRoute
   AdminAuditRoute: typeof AdminAuditRoute
@@ -364,6 +363,7 @@ export interface RootRouteChildren {
   PermohonanIdRoute: typeof PermohonanIdRoute
   PermohonanBaruRoute: typeof PermohonanBaruRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  LayananIndexRoute: typeof LayananIndexRoute
   PermohonanIndexRoute: typeof PermohonanIndexRoute
   ApiPublicTelegramWebhookRoute: typeof ApiPublicTelegramWebhookRoute
 }
@@ -382,13 +382,6 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/layanan': {
-      id: '/layanan'
-      path: '/layanan'
-      fullPath: '/layanan'
-      preLoaderRoute: typeof LayananRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kontak': {
@@ -438,6 +431,13 @@ declare module '@tanstack/react-router' {
       path: '/permohonan'
       fullPath: '/permohonan/'
       preLoaderRoute: typeof PermohonanIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/layanan/': {
+      id: '/layanan/'
+      path: '/layanan'
+      fullPath: '/layanan/'
+      preLoaderRoute: typeof LayananIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -555,17 +555,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface LayananRouteChildren {
-  LayananSlugRoute: typeof LayananSlugRoute
-}
-
-const LayananRouteChildren: LayananRouteChildren = {
-  LayananSlugRoute: LayananSlugRoute,
-}
-
-const LayananRouteWithChildren =
-  LayananRoute._addFileChildren(LayananRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
@@ -573,7 +562,6 @@ const rootRouteChildren: RootRouteChildren = {
   DataRoute: DataRoute,
   KinerjaOpdRoute: KinerjaOpdRoute,
   KontakRoute: KontakRoute,
-  LayananRoute: LayananRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   TentangRoute: TentangRoute,
   AdminAuditRoute: AdminAuditRoute,
@@ -590,9 +578,19 @@ const rootRouteChildren: RootRouteChildren = {
   PermohonanIdRoute: PermohonanIdRoute,
   PermohonanBaruRoute: PermohonanBaruRoute,
   AdminIndexRoute: AdminIndexRoute,
+  LayananIndexRoute: LayananIndexRoute,
   PermohonanIndexRoute: PermohonanIndexRoute,
   ApiPublicTelegramWebhookRoute: ApiPublicTelegramWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
