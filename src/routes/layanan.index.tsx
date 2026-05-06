@@ -6,7 +6,7 @@ import { LayananOpdPageSkeleton } from "@/components/site/Skeletons";
 import { FileText, Search, LayoutGrid } from "lucide-react";
 import { layananAllWithOpdQueryOptions } from "@/lib/queries";
 
-export const Route = createFileRoute("/layanan")({
+export const Route = createFileRoute("/layanan/")({
   head: () => ({
     meta: [
       { title: "Layanan Publik — Pemerintah Kabupaten Buton Selatan" },
