@@ -704,6 +704,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      opd_kinerja_agg: {
+        Args: never
+        Returns: {
+          jumlah_selesai: number
+          opd_id: string
+          selesai_dengan_sla: number
+          status: string
+          tepat_waktu: number
+          total: number
+          total_hari_selesai: number
+        }[]
+      }
     }
     Enums: {
       app_role: "warga" | "admin_opd" | "super_admin"
