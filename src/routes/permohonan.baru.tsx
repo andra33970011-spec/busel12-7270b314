@@ -36,8 +36,8 @@ const formSchema = z.object({
   prioritas: z.enum(["rendah", "normal", "tinggi"]),
 });
 
-const MAX_FILES = 5;
-const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
+const MAX_FILES = 10;
+const MAX_FILE_BYTES = 1 * 1024 * 1024; // 1 MB
 const ALLOWED_MIME = new Set([
   "application/pdf",
   "image/jpeg",
