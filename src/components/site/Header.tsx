@@ -160,12 +160,12 @@ export function Header() {
           {user ? (
             <Link
               to="/permohonan"
-              className="md:hidden inline-flex h-10 items-center gap-1.5 rounded-md border border-border bg-card px-2.5 text-xs font-semibold text-foreground"
+              aria-label={displayName}
+              className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card text-xs font-semibold text-foreground shrink-0"
             >
-              <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-primary text-[11px] font-bold text-primary-foreground">
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-primary text-[12px] font-bold text-primary-foreground">
                 {displayName.charAt(0).toUpperCase()}
               </span>
-              <span className="max-w-[80px] truncate">{displayName}</span>
             </Link>
           ) : (
             <Link
