@@ -55,8 +55,12 @@ function LayananDetailPage() {
               </div>
               <h1 className="mt-3 max-w-3xl text-balance text-3xl font-bold md:text-5xl">{item.judul}</h1>
               {opd && (
-                <p className="mt-3 inline-flex items-center gap-2 text-sm text-white/85">
-                  <Building2 className="h-4 w-4" /> Penanggung jawab: <span className="font-semibold">{opd.singkatan}</span> — {opd.nama}
+                <p className="mt-4 flex items-start gap-2 text-sm text-white/85 sm:items-center">
+                  <Building2 className="mt-0.5 h-4 w-4 shrink-0 sm:mt-0" />
+                  <span className="leading-relaxed">
+                    Penanggung jawab: <span className="font-semibold">{opd.singkatan}</span>
+                    <span className="text-white/75"> — {opd.nama}</span>
+                  </span>
                 </p>
               )}
             </>
