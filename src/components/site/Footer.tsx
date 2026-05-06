@@ -4,7 +4,7 @@ import lambang from "@/assets/lambang.png";
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-border bg-surface">
+    <footer className="mt-12 sm:mt-16 md:mt-20 border-t border-border bg-surface">
       <div className="container-page grid gap-10 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-3">
