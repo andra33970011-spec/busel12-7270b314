@@ -20,21 +20,11 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
     .select("id, nama, singkatan");
   if (opdError) throw opdError;
 
-  // 2. Ambil semua permohonan dengan tenggat (SLA aktual yang dihitung saat pengajuan)
-  const { data: permohonan, error: pError } = await supabase
-    .from("permohonan")
-    .select(`
-      id,
-      opd_id,
-      status,
-      tanggal_masuk,
-      updated_at,
-      tenggat
-    `)
-    .limit(10000);
+  // 2. Ambil agregat permohonan via RPC (bypass RLS, dapat diakses publik)
+  const { data: aggRows, error: pError } = await supabase.rpc("opd_kinerja_agg");
   if (pError) throw pError;
 
-  // 3. Ambil semua rating
+  // 3. Ambil semua rating + permohonan_id → opd_id mapping via agregat
   const { data: ratings, error: rError } = await supabase
     .from("permohonan_rating")
     .select("permohonan_id, skor");
@@ -42,70 +32,86 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
     console.warn("Tabel permohonan_rating belum ada, rating diabaikan");
   }
 
-  const ratingsMap = new Map<string, number>();
-  if (ratings) {
-    for (const r of ratings) {
-      ratingsMap.set(r.permohonan_id, r.skor);
+  // Untuk rating per OPD, kita butuh tahu opd_id setiap permohonan_id.
+  // Karena permohonan tak bisa dibaca publik, kita ambil via RPC tambahan opsional.
+  // Sederhana: rating diagregasi ke OPD via tabel permohonan jika dapat dibaca, jika tidak diabaikan.
+  const { data: permohonanForRating } = await supabase
+    .from("permohonan")
+    .select("id, opd_id")
+    .limit(10000);
+  const permohonanOpdMap = new Map<string, string>();
+  (permohonanForRating ?? []).forEach((p) => {
+    if (p.opd_id) permohonanOpdMap.set(p.id, p.opd_id);
+  });
+
+  const ratingByOpd = new Map<string, { total: number; count: number }>();
+  (ratings ?? []).forEach((r) => {
+    const opdId = permohonanOpdMap.get(r.permohonan_id);
+    if (!opdId) return;
+    const cur = ratingByOpd.get(opdId) ?? { total: 0, count: 0 };
+    cur.total += r.skor;
+    cur.count += 1;
+    ratingByOpd.set(opdId, cur);
+  });
+
+  // 4. Aggregate rows per OPD
+  type Agg = {
+    total: number;
+    status_counts: Record<StatusPermohonan, number>;
+    totalHariSelesai: number;
+    jumlahSelesai: number;
+    tepatWaktu: number;
+    selesaiDenganSLA: number;
+  };
+  const aggByOpd = new Map<string, Agg>();
+  for (const row of (aggRows ?? []) as Array<{
+    opd_id: string;
+    status: string;
+    total: number;
+    total_hari_selesai: number;
+    jumlah_selesai: number;
+    tepat_waktu: number;
+    selesai_dengan_sla: number;
+  }>) {
+    if (!row.opd_id) continue;
+    const cur: Agg = aggByOpd.get(row.opd_id) ?? {
+      total: 0,
+      status_counts: { baru: 0, diproses: 0, selesai: 0, ditolak: 0 },
+      totalHariSelesai: 0,
+      jumlahSelesai: 0,
+      tepatWaktu: 0,
+      selesaiDenganSLA: 0,
+    };
+    cur.total += Number(row.total) || 0;
+    if (row.status in cur.status_counts) {
+      cur.status_counts[row.status as StatusPermohonan] += Number(row.total) || 0;
     }
+    cur.totalHariSelesai += Number(row.total_hari_selesai) || 0;
+    cur.jumlahSelesai += Number(row.jumlah_selesai) || 0;
+    cur.tepatWaktu += Number(row.tepat_waktu) || 0;
+    cur.selesaiDenganSLA += Number(row.selesai_dengan_sla) || 0;
+    aggByOpd.set(row.opd_id, cur);
   }
 
-  // 4. Proses per OPD
   const result: OpdKinerja[] = opds.map((opd) => {
-    const permohonanOpd = permohonan?.filter((p) => p.opd_id === opd.id) || [];
-
-    const status_counts: Record<StatusPermohonan, number> = {
-      baru: 0,
-      diproses: 0,
-      selesai: 0,
-      ditolak: 0,
+    const a = aggByOpd.get(opd.id) ?? {
+      total: 0,
+      status_counts: { baru: 0, diproses: 0, selesai: 0, ditolak: 0 } as Record<StatusPermohonan, number>,
+      totalHariSelesai: 0,
+      jumlahSelesai: 0,
+      tepatWaktu: 0,
+      selesaiDenganSLA: 0,
     };
-    let totalHariSelesai = 0;
-    let jumlahSelesai = 0;
-    let totalRating = 0;
-    let jumlahRating = 0;
-    let tepatWaktu = 0;
-    let selesaiDenganSLA = 0;
-
-    for (const p of permohonanOpd) {
-      if (p.status in status_counts) status_counts[p.status as StatusPermohonan]++;
-
-      const skor = ratingsMap.get(p.id);
-      if (skor) {
-        totalRating += skor;
-        jumlahRating++;
-      }
-
-      if (p.status === "selesai" && p.tanggal_masuk && p.updated_at) {
-        const ms = new Date(p.updated_at).getTime() - new Date(p.tanggal_masuk).getTime();
-        const hari = ms / (1000 * 3600 * 24);
-        if (!isNaN(hari) && hari >= 0) {
-          totalHariSelesai += hari;
-          jumlahSelesai++;
-
-          // Tepat waktu = selesai (updated_at) tidak melewati tenggat permohonan
-          if (p.tenggat) {
-            const selesaiTs = new Date(p.updated_at).getTime();
-            const tenggatTs = new Date(p.tenggat).getTime();
-            if (selesaiTs <= tenggatTs) tepatWaktu++;
-            selesaiDenganSLA++;
-          }
-        }
-      }
-    }
-
-    const rata_hari_selesai = jumlahSelesai > 0 ? totalHariSelesai / jumlahSelesai : null;
-    const rata_rating = jumlahRating > 0 ? totalRating / jumlahRating : null;
-    const tepat_waktu_persen = selesaiDenganSLA > 0 ? (tepatWaktu / selesaiDenganSLA) * 100 : null;
-
+    const r = ratingByOpd.get(opd.id);
     return {
       opd_id: opd.id,
       opd_nama: opd.nama,
       opd_singkatan: opd.singkatan,
-      total_permohonan: permohonanOpd.length,
-      status_counts,
-      rata_hari_selesai,
-      rata_rating,
-      tepat_waktu_persen,
+      total_permohonan: a.total,
+      status_counts: a.status_counts,
+      rata_hari_selesai: a.jumlahSelesai > 0 ? a.totalHariSelesai / a.jumlahSelesai : null,
+      rata_rating: r && r.count > 0 ? r.total / r.count : null,
+      tepat_waktu_persen: a.selesaiDenganSLA > 0 ? (a.tepatWaktu / a.selesaiDenganSLA) * 100 : null,
     };
   });
 
