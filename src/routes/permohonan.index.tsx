@@ -95,9 +95,6 @@ function ListPage() {
     <PageShell>
       <PageHero eyebrow="Akun Saya" title="Permohonan Saya" description="Pantau status pengajuan layanan publik Anda." />
       <section className="container-page py-12">
-        <div className="mb-6">
-          <TelegramLinkCard botUsername="buselmelayani_bot" />
-        </div>
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-display text-lg font-semibold">Daftar Permohonan</h2>
           <Link
