@@ -2,7 +2,7 @@
 // (super admin bisa pilih OPD untuk preview). Navigasi diperluas ke halaman baru.
 import { type ReactNode, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Users, FileClock, Database as DbIcon, ChevronRight, LogOut, Building2, Settings, Newspaper, FolderOpen, BarChart3, UserSquare2, Send } from "lucide-react";
+import { LayoutDashboard, Inbox, Users, FileClock, Database as DbIcon, ChevronRight, LogOut, Building2, Settings, Newspaper, FolderOpen, BarChart3, UserSquare2 } from "lucide-react";
 import lambang from "@/assets/lambang.png";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
