@@ -151,11 +151,6 @@ function DetailPermohonan() {
         data_sesudah: { status: statusBaru, catatan: catatanStatus || null },
       });
 
-      // Notifikasi Telegram ke pemohon (best-effort)
-      if (oldStatus !== statusBaru) {
-        notifyStatusChange({ data: { permohonanId: item.id, catatan: catatanStatus || undefined } }).catch((e) => console.warn("TG notify gagal", e));
-      }
-
       setCatatanStatus("");
       toast.success("Status diperbarui");
       await load();
