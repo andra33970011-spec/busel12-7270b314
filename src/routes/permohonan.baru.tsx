@@ -184,9 +184,6 @@ function BaruPage() {
 
       await logAudit({ aksi: "permohonan.created", entitas: "permohonan", entitas_id: row.id });
 
-      // Notifikasi Telegram ke admin OPD (best-effort, jangan blokir UX)
-      notifyPermohonanBaru({ data: { permohonanId: row.id } }).catch((e) => console.warn("TG notify gagal", e));
-
       toast.success(`Permohonan ${kode} berhasil diajukan`);
       navigate({ to: "/permohonan" });
     } catch (err) {
