@@ -1,14 +1,15 @@
 // Backup & disaster recovery — Super Admin.
 // Satu tombol untuk backup semua tabel sekaligus (file JSON gabungan)
 // dan fitur upload restore yang mendistribusikan kembali datanya per tabel.
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Download, Loader2, Database, AlertTriangle, Upload, CheckCircle2 } from "lucide-react";
+import { Download, Loader2, Database, AlertTriangle, Upload, CheckCircle2, Cloud, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { AdminGuard } from "@/components/admin/AdminGuard";
 import { useAuth } from "@/lib/auth-context";
 import { exportTable, enqueueJob, importBackup } from "@/lib/admin-actions.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/admin/backup")({
   head: () => ({ meta: [{ title: "Backup Data — Admin" }, { name: "robots", content: "noindex" }] }),
@@ -258,6 +259,139 @@ function BackupPage() {
           </button>
         </div>
       </div>
+      <GdriveBackupCard />
     </AdminShell>
+  );
+}
+
+type GdriveConfig = {
+  enabled: boolean;
+  folder_id: string;
+  schedule: "daily" | "weekly" | "monthly";
+  last_run: string | null;
+  last_status: string | null;
+  last_file: string | null;
+};
+
+const DEFAULT_GDRIVE: GdriveConfig = {
+  enabled: false,
+  folder_id: "",
+  schedule: "daily",
+  last_run: null,
+  last_status: null,
+  last_file: null,
+};
+
+function GdriveBackupCard() {
+  const [cfg, setCfg] = useState<GdriveConfig | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [showSetup, setShowSetup] = useState(false);
+
+  useEffect(() => {
+    supabase.from("app_setting").select("value").eq("key", "gdrive_backup_config").maybeSingle().then(({ data }) => {
+      const v = data?.value as Partial<GdriveConfig> | null;
+      setCfg({ ...DEFAULT_GDRIVE, ...(v ?? {}) });
+    });
+  }, []);
+
+  async function save(next: GdriveConfig) {
+    setSaving(true);
+    const { error } = await supabase
+      .from("app_setting")
+      .upsert({ key: "gdrive_backup_config", value: next as unknown as never }, { onConflict: "key" });
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setCfg(next);
+    toast.success("Pengaturan backup Google Drive disimpan");
+  }
+
+  if (!cfg) return null;
+
+  return (
+    <div className="mt-8 rounded-xl border border-border bg-card p-5">
+      <div className="flex items-start gap-4">
+        <span className="grid h-11 w-11 place-items-center rounded-lg bg-primary-soft text-primary">
+          <Cloud className="h-5 w-5" />
+        </span>
+        <div className="flex-1">
+          <h2 className="font-display text-lg font-semibold">Backup Otomatis ke Google Drive</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Atur backup terjadwal agar database otomatis disalin ke folder Google Drive Anda. Eksekusi dilakukan oleh worker eksternal (cron) yang membaca pengaturan ini.
+          </p>
+        </div>
+        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2">
+          <span className="text-xs text-muted-foreground">{cfg.enabled ? "Aktif" : "Nonaktif"}</span>
+          <button
+            onClick={() => save({ ...cfg, enabled: !cfg.enabled })}
+            disabled={saving}
+            className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors disabled:opacity-50 ${cfg.enabled ? "bg-primary" : "bg-muted"}`}
+            aria-label="Toggle"
+          >
+            <span className={`inline-block h-5 w-5 rounded-full bg-background shadow transition-transform ${cfg.enabled ? "translate-x-8" : "translate-x-1"}`} />
+          </button>
+        </label>
+      </div>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <div>
+          <label className="block text-xs font-semibold uppercase text-muted-foreground">Folder ID Google Drive</label>
+          <input
+            type="text"
+            value={cfg.folder_id}
+            onChange={(e) => setCfg({ ...cfg, folder_id: e.target.value })}
+            onBlur={() => save(cfg)}
+            placeholder="contoh: 1AbCDEF...xyz"
+            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm font-mono"
+          />
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            Buka folder tujuan di Google Drive → salin bagian setelah <code>/folders/</code> di URL.
+          </p>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase text-muted-foreground">Frekuensi</label>
+          <select
+            value={cfg.schedule}
+            onChange={(e) => save({ ...cfg, schedule: e.target.value as GdriveConfig["schedule"] })}
+            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
+          >
+            <option value="daily">Harian (02:00 WITA)</option>
+            <option value="weekly">Mingguan (Minggu 02:00)</option>
+            <option value="monthly">Bulanan (Tgl 1, 02:00)</option>
+          </select>
+        </div>
+      </div>
+
+      {cfg.last_run && (
+        <div className="mt-4 rounded-md border border-border bg-muted/40 p-3 text-xs">
+          <div><strong>Backup terakhir:</strong> {new Date(cfg.last_run).toLocaleString("id-ID")}</div>
+          {cfg.last_status && <div><strong>Status:</strong> {cfg.last_status}</div>}
+          {cfg.last_file && <div className="truncate"><strong>File:</strong> {cfg.last_file}</div>}
+        </div>
+      )}
+
+      <button
+        onClick={() => setShowSetup((v) => !v)}
+        className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+      >
+        <SettingsIcon className="h-3.5 w-3.5" /> {showSetup ? "Sembunyikan" : "Lihat"} panduan setup worker
+      </button>
+
+      {showSetup && (
+        <div className="mt-3 rounded-md border border-border bg-muted/30 p-4 text-xs">
+          <div className="mb-2 font-semibold">Setup worker backup (jalan di luar Lovable)</div>
+          <ol className="ml-4 list-decimal space-y-1.5 text-muted-foreground">
+            <li>Aktifkan Google Drive API di Google Cloud Console & buat <strong>Service Account</strong>, unduh file JSON kredensialnya.</li>
+            <li>Share folder Google Drive tujuan ke email service account (akses Editor), salin Folder ID ke kolom di atas.</li>
+            <li>Simpan kredensial JSON sebagai secret <code>GOOGLE_SERVICE_ACCOUNT_JSON</code> di Cloudflare Workers / GitHub Actions Anda.</li>
+            <li>Tambahkan secret Supabase: <code>SUPABASE_URL</code> dan <code>SUPABASE_SERVICE_ROLE_KEY</code>.</li>
+            <li>Buat scheduled job (cron) yang: (a) baca <code>app_setting.gdrive_backup_config</code>, (b) jika <code>enabled=true</code> dan jadwal cocok, dump semua tabel ke JSON, (c) upload ke Drive folder <code>folder_id</code>, (d) update field <code>last_run / last_status / last_file</code>.</li>
+            <li>Contoh script siap pakai tersedia di file <code>scripts/gdrive-backup.md</code> di repo (akan dibuat saat anda push ke supabase pribadi).</li>
+          </ol>
+        </div>
+      )}
+    </div>
   );
 }
