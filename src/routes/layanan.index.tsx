@@ -25,29 +25,29 @@ export const Route = createFileRoute("/layanan/")({
 function LayananPage() {
   const { data: layanan } = useSuspenseQuery(layananAllWithOpdQueryOptions());
   const [q, setQ] = useState("");
-  const [kategoriAktif, setKategoriAktif] = useState<string>("__all__");
+  const [opdAktif, setOpdAktif] = useState<string>("__all__");
 
-  // kumpulkan semua kategori unik dari OPD
-  const kategoriList = useMemo(() => {
-    const set = new Set<string>();
+  // kumpulkan semua dinas unik dari layanan
+  const opdList = useMemo(() => {
+    const map = new Map<string, { id: string; singkatan: string; nama: string }>();
     for (const l of layanan) {
-      l.opd?.kategori?.forEach((k) => set.add(k));
+      if (l.opd) map.set(l.opd.id, { id: l.opd.id, singkatan: l.opd.singkatan, nama: l.opd.nama });
     }
-    return Array.from(set).sort((a, b) => a.localeCompare(b, "id"));
+    return Array.from(map.values()).sort((a, b) => a.singkatan.localeCompare(b.singkatan, "id"));
   }, [layanan]);
 
   const filtered = useMemo(() => {
     const kw = q.trim().toLowerCase();
     return layanan.filter((l) => {
-      if (kategoriAktif !== "__all__") {
-        if (!l.opd?.kategori?.includes(kategoriAktif)) return false;
+      if (opdAktif !== "__all__") {
+        if (l.opd?.id !== opdAktif) return false;
       }
       if (!kw) return true;
       return `${l.judul} ${l.deskripsi ?? ""} ${l.opd?.singkatan ?? ""} ${l.opd?.nama ?? ""}`
         .toLowerCase()
         .includes(kw);
     });
-  }, [layanan, q, kategoriAktif]);
+  }, [layanan, q, opdAktif]);
 
   return (
     <PageShell>
@@ -78,32 +78,34 @@ function LayananPage() {
 
             <div>
               <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Kategori
+                Dinas / OPD
               </h3>
-              <ul className="overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+              <ul className="overflow-hidden rounded-xl border border-border bg-card shadow-soft max-h-[60vh] overflow-y-auto">
                 <li>
                   <button
-                    onClick={() => setKategoriAktif("__all__")}
+                    onClick={() => setOpdAktif("__all__")}
                     className={`block w-full px-4 py-2.5 text-left text-sm transition-colors ${
-                      kategoriAktif === "__all__"
+                      opdAktif === "__all__"
                         ? "bg-primary font-semibold text-primary-foreground"
                         : "hover:bg-muted"
                     }`}
                   >
-                    Semua kategori
+                    Semua dinas
                   </button>
                 </li>
-                {kategoriList.map((k) => (
-                  <li key={k} className="border-t border-border">
+                {opdList.map((o) => (
+                  <li key={o.id} className="border-t border-border">
                     <button
-                      onClick={() => setKategoriAktif(k)}
+                      onClick={() => setOpdAktif(o.id)}
+                      title={o.nama}
                       className={`block w-full px-4 py-2.5 text-left text-sm transition-colors ${
-                        kategoriAktif === k
+                        opdAktif === o.id
                           ? "bg-primary font-semibold text-primary-foreground"
                           : "hover:bg-muted"
                       }`}
                     >
-                      {k}
+                      <div className="font-medium">{o.singkatan}</div>
+                      <div className={`text-[11px] truncate ${opdAktif === o.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{o.nama}</div>
                     </button>
                   </li>
                 ))}
