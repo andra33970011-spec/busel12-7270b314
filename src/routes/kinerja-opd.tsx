@@ -1,5 +1,6 @@
 // src/routes/kinerja-opd.tsx
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { PageShell, PageHero } from "@/components/site/PageShell";
 import {
@@ -18,6 +19,8 @@ import {
 import { Building2, CheckCircle2, Clock, ThumbsUp, TrendingUp, AlertCircle } from "lucide-react";
 import { fetchAllOpdKinerja } from "@/lib/kinerja-queries";
 import { STATUS_LABEL, STATUS_TONE } from "@/lib/permohonan";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/kinerja-opd")({
   head: () => ({
@@ -32,6 +35,23 @@ export const Route = createFileRoute("/kinerja-opd")({
 const COLORS = ["#3b82f6", "#f59e0b", "#10b981", "#ef4444"];
 
 function KinerjaOpdPage() {
+  const navigate = useNavigate();
+  const { isSuperAdmin, loading: authLoading } = useAuth();
+  const [visiblePublic, setVisiblePublic] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase.from("app_setting").select("value").eq("key", "kinerja_opd_visible_public").maybeSingle().then(({ data }) => {
+      const v = data?.value;
+      setVisiblePublic(v === false || v === "false" ? false : true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (visiblePublic === false && !authLoading && !isSuperAdmin) {
+      navigate({ to: "/" });
+    }
+  }, [visiblePublic, authLoading, isSuperAdmin, navigate]);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["kinerja-opd"],
     queryFn: fetchAllOpdKinerja,
