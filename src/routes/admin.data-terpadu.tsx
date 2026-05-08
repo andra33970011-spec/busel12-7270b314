@@ -68,7 +68,20 @@ function DataTerpaduAdminPage() {
         <p className="text-sm text-muted-foreground">Kelola semua konten yang tampil di halaman publik /data dan atur visibilitasnya.</p>
       </div>
 
-      <VisibilityCard />
+      <VisibilityCard
+        settingKey="data_terpadu_visible_public"
+        title="Visibilitas Menu Data Terpadu"
+        description="Saat nonaktif, menu disembunyikan dari pengunjung publik & admin OPD, dan halaman /data akan diblokir untuk mereka. Super admin tetap bisa mengakses."
+        toastOn="Menu Data Terpadu ditampilkan ke publik"
+        toastOff="Menu Data Terpadu disembunyikan dari publik & admin OPD"
+      />
+      <VisibilityCard
+        settingKey="kinerja_opd_visible_public"
+        title="Visibilitas Menu Kinerja OPD"
+        description="Saat nonaktif, menu Kinerja OPD disembunyikan dari publik & admin OPD, dan halaman /kinerja-opd akan diblokir. Super admin tetap bisa mengakses."
+        toastOn="Menu Kinerja OPD ditampilkan ke publik"
+        toastOff="Menu Kinerja OPD disembunyikan dari publik"
+      />
 
       <div className="mb-4 flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
         {(Object.keys(KATEGORI_LABEL) as Kategori[]).map((k) => (
