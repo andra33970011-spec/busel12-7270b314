@@ -26,6 +26,7 @@ import { Route as LayananSlugRouteImport } from './routes/layanan.$slug'
 import { Route as InstansiSingkatanRouteImport } from './routes/instansi.$singkatan'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
 import { Route as AdminStorageRouteImport } from './routes/admin.storage'
+import { Route as AdminRatingRouteImport } from './routes/admin.rating'
 import { Route as AdminPejabatRouteImport } from './routes/admin.pejabat'
 import { Route as AdminOpdRouteImport } from './routes/admin.opd'
 import { Route as AdminDataTerpaduRouteImport } from './routes/admin.data-terpadu'
@@ -119,6 +120,11 @@ const AdminStorageRoute = AdminStorageRouteImport.update({
   path: '/admin/storage',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRatingRoute = AdminRatingRouteImport.update({
+  id: '/admin/rating',
+  path: '/admin/rating',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPejabatRoute = AdminPejabatRouteImport.update({
   id: '/admin/pejabat',
   path: '/admin/pejabat',
@@ -171,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/admin/data-terpadu': typeof AdminDataTerpaduRoute
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
+  '/admin/rating': typeof AdminRatingRoute
   '/admin/storage': typeof AdminStorageRoute
   '/admin/users': typeof AdminUsersRoute
   '/instansi/$singkatan': typeof InstansiSingkatanRoute
@@ -197,6 +204,7 @@ export interface FileRoutesByTo {
   '/admin/data-terpadu': typeof AdminDataTerpaduRoute
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
+  '/admin/rating': typeof AdminRatingRoute
   '/admin/storage': typeof AdminStorageRoute
   '/admin/users': typeof AdminUsersRoute
   '/instansi/$singkatan': typeof InstansiSingkatanRoute
@@ -224,6 +232,7 @@ export interface FileRoutesById {
   '/admin/data-terpadu': typeof AdminDataTerpaduRoute
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
+  '/admin/rating': typeof AdminRatingRoute
   '/admin/storage': typeof AdminStorageRoute
   '/admin/users': typeof AdminUsersRoute
   '/instansi/$singkatan': typeof InstansiSingkatanRoute
@@ -252,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin/data-terpadu'
     | '/admin/opd'
     | '/admin/pejabat'
+    | '/admin/rating'
     | '/admin/storage'
     | '/admin/users'
     | '/instansi/$singkatan'
@@ -278,6 +288,7 @@ export interface FileRouteTypes {
     | '/admin/data-terpadu'
     | '/admin/opd'
     | '/admin/pejabat'
+    | '/admin/rating'
     | '/admin/storage'
     | '/admin/users'
     | '/instansi/$singkatan'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/admin/data-terpadu'
     | '/admin/opd'
     | '/admin/pejabat'
+    | '/admin/rating'
     | '/admin/storage'
     | '/admin/users'
     | '/instansi/$singkatan'
@@ -331,6 +343,7 @@ export interface RootRouteChildren {
   AdminDataTerpaduRoute: typeof AdminDataTerpaduRoute
   AdminOpdRoute: typeof AdminOpdRoute
   AdminPejabatRoute: typeof AdminPejabatRoute
+  AdminRatingRoute: typeof AdminRatingRoute
   AdminStorageRoute: typeof AdminStorageRoute
   AdminUsersRoute: typeof AdminUsersRoute
   InstansiSingkatanRoute: typeof InstansiSingkatanRoute
@@ -463,6 +476,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStorageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/rating': {
+      id: '/admin/rating'
+      path: '/admin/rating'
+      fullPath: '/admin/rating'
+      preLoaderRoute: typeof AdminRatingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/pejabat': {
       id: '/admin/pejabat'
       path: '/admin/pejabat'
@@ -531,6 +551,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDataTerpaduRoute: AdminDataTerpaduRoute,
   AdminOpdRoute: AdminOpdRoute,
   AdminPejabatRoute: AdminPejabatRoute,
+  AdminRatingRoute: AdminRatingRoute,
   AdminStorageRoute: AdminStorageRoute,
   AdminUsersRoute: AdminUsersRoute,
   InstansiSingkatanRoute: InstansiSingkatanRoute,
