@@ -2,7 +2,7 @@
 // (super admin bisa pilih OPD untuk preview). Navigasi diperluas ke halaman baru.
 import { type ReactNode, useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { LayoutDashboard, Inbox, Users, FileClock, Database as DbIcon, ChevronRight, LogOut, Building2, Settings, Newspaper, FolderOpen, BarChart3, UserSquare2 } from "lucide-react";
+import { LayoutDashboard, Inbox, Users, FileClock, Database as DbIcon, ChevronRight, LogOut, Building2, Newspaper, FolderOpen, BarChart3, UserSquare2, Star } from "lucide-react";
 import lambang from "@/assets/lambang.png";
 import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,10 +16,10 @@ const baseNav = [
 const superNav = [
   { to: "/admin/users", label: "Manajemen User", icon: Users },
   { to: "/admin/opd", label: "OPD", icon: Building2 },
-  { to: "/admin/config", label: "Konfigurasi", icon: Settings },
   { to: "/admin/cms", label: "CMS Konten", icon: Newspaper },
   { to: "/admin/pejabat", label: "Pejabat", icon: UserSquare2 },
   { to: "/admin/data-terpadu", label: "Data Terpadu", icon: BarChart3 },
+  { to: "/admin/rating", label: "Rating & Komentar", icon: Star },
   { to: "/admin/storage", label: "Storage", icon: FolderOpen },
   { to: "/admin/audit", label: "Audit Log", icon: FileClock },
   { to: "/admin/backup", label: "Backup Data", icon: DbIcon },

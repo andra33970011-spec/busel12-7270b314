@@ -68,7 +68,20 @@ function DataTerpaduAdminPage() {
         <p className="text-sm text-muted-foreground">Kelola semua konten yang tampil di halaman publik /data dan atur visibilitasnya.</p>
       </div>
 
-      <VisibilityCard />
+      <VisibilityCard
+        settingKey="data_terpadu_visible_public"
+        title="Visibilitas Menu Data Terpadu"
+        description="Saat nonaktif, menu disembunyikan dari pengunjung publik & admin OPD, dan halaman /data akan diblokir untuk mereka. Super admin tetap bisa mengakses."
+        toastOn="Menu Data Terpadu ditampilkan ke publik"
+        toastOff="Menu Data Terpadu disembunyikan dari publik & admin OPD"
+      />
+      <VisibilityCard
+        settingKey="kinerja_opd_visible_public"
+        title="Visibilitas Menu Kinerja OPD"
+        description="Saat nonaktif, menu Kinerja OPD disembunyikan dari publik & admin OPD, dan halaman /kinerja-opd akan diblokir. Super admin tetap bisa mengakses."
+        toastOn="Menu Kinerja OPD ditampilkan ke publik"
+        toastOff="Menu Kinerja OPD disembunyikan dari publik"
+      />
 
       <div className="mb-4 flex flex-wrap gap-1 rounded-lg border border-border bg-card p-1">
         {(Object.keys(KATEGORI_LABEL) as Kategori[]).map((k) => (
@@ -87,7 +100,19 @@ function DataTerpaduAdminPage() {
   );
 }
 
-function VisibilityCard() {
+function VisibilityCard({
+  settingKey,
+  title,
+  description,
+  toastOn,
+  toastOff,
+}: {
+  settingKey: string;
+  title: string;
+  description: string;
+  toastOn: string;
+  toastOff: string;
+}) {
   const [visible, setVisible] = useState<boolean | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -95,13 +120,13 @@ function VisibilityCard() {
     supabase
       .from("app_setting")
       .select("value")
-      .eq("key", "data_terpadu_visible_public")
+      .eq("key", settingKey)
       .maybeSingle()
       .then(({ data }) => {
         const v = data?.value;
         setVisible(v === true || v === "true" ? true : v === false || v === "false" ? false : true);
       });
-  }, []);
+  }, [settingKey]);
 
   async function toggle() {
     if (visible === null) return;
@@ -109,27 +134,25 @@ function VisibilityCard() {
     const next = !visible;
     const { error } = await supabase
       .from("app_setting")
-      .upsert({ key: "data_terpadu_visible_public", value: next as unknown as never }, { onConflict: "key" });
+      .upsert({ key: settingKey, value: next as unknown as never }, { onConflict: "key" });
     setSaving(false);
     if (error) {
       toast.error(error.message);
       return;
     }
     setVisible(next);
-    toast.success(next ? "Menu Data Terpadu ditampilkan ke publik" : "Menu Data Terpadu disembunyikan dari publik & admin OPD");
+    toast.success(next ? toastOn : toastOff);
   }
 
   return (
-    <div className="mb-5 flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-soft">
+    <div className="mb-3 flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-soft">
       <div className="flex items-start gap-3">
         <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary-soft text-primary">
           {visible ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
         </div>
         <div>
-          <div className="font-semibold">Visibilitas Menu Data Terpadu</div>
-          <div className="text-xs text-muted-foreground">
-            Saat <strong>nonaktif</strong>, menu disembunyikan dari pengunjung publik & admin OPD, dan halaman /data akan diblokir untuk mereka. Super admin tetap bisa mengakses.
-          </div>
+          <div className="font-semibold">{title}</div>
+          <div className="text-xs text-muted-foreground">{description}</div>
         </div>
       </div>
       <button

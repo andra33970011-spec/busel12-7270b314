@@ -21,6 +21,7 @@ export function Header() {
   const { user, isAdmin, isSuperAdmin, signOut } = useAuth();
   const menuRef = useRef<HTMLDivElement>(null);
   const [dataVisiblePublic, setDataVisiblePublic] = useState<boolean>(true);
+  const [kinerjaVisiblePublic, setKinerjaVisiblePublic] = useState<boolean>(true);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -33,18 +34,22 @@ export function Header() {
   useEffect(() => {
     supabase
       .from("app_setting")
-      .select("value")
-      .eq("key", "data_terpadu_visible_public")
-      .maybeSingle()
+      .select("key,value")
+      .in("key", ["data_terpadu_visible_public", "kinerja_opd_visible_public"])
       .then(({ data }) => {
-        const v = data?.value;
-        setDataVisiblePublic(v === false || v === "false" ? false : true);
+        for (const r of data ?? []) {
+          const v = (r as { key: string; value: unknown }).value;
+          const visible = v === false || v === "false" ? false : true;
+          if ((r as { key: string }).key === "data_terpadu_visible_public") setDataVisiblePublic(visible);
+          if ((r as { key: string }).key === "kinerja_opd_visible_public") setKinerjaVisiblePublic(visible);
+        }
       });
   }, []);
 
-  // Sembunyikan menu Data Terpadu jika visibility OFF dan user bukan super admin
+  // Sembunyikan menu Data Terpadu / Kinerja OPD jika visibility OFF dan user bukan super admin
   const visibleNavItems = navItems.filter((item) => {
     if (item.to === "/data" && !dataVisiblePublic && !isSuperAdmin) return false;
+    if (item.to === "/kinerja-opd" && !kinerjaVisiblePublic && !isSuperAdmin) return false;
     return true;
   });
 

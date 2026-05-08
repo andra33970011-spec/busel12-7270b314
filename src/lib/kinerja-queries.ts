@@ -24,34 +24,12 @@ export async function fetchAllOpdKinerja(): Promise<OpdKinerja[]> {
   const { data: aggRows, error: pError } = await supabase.rpc("opd_kinerja_agg");
   if (pError) throw pError;
 
-  // 3. Ambil semua rating + permohonan_id → opd_id mapping via agregat
-  const { data: ratings, error: rError } = await supabase
-    .from("permohonan_rating")
-    .select("permohonan_id, skor");
-  if (rError && rError.code !== "PGRST116") {
-    console.warn("Tabel permohonan_rating belum ada, rating diabaikan");
-  }
-
-  // Untuk rating per OPD, kita butuh tahu opd_id setiap permohonan_id.
-  // Karena permohonan tak bisa dibaca publik, kita ambil via RPC tambahan opsional.
-  // Sederhana: rating diagregasi ke OPD via tabel permohonan jika dapat dibaca, jika tidak diabaikan.
-  const { data: permohonanForRating } = await supabase
-    .from("permohonan")
-    .select("id, opd_id")
-    .limit(10000);
-  const permohonanOpdMap = new Map<string, string>();
-  (permohonanForRating ?? []).forEach((p) => {
-    if (p.opd_id) permohonanOpdMap.set(p.id, p.opd_id);
-  });
-
+  // 3. Ambil agregat rating per OPD via RPC publik
+  const { data: ratingRows } = await supabase.rpc("opd_rating_agg");
   const ratingByOpd = new Map<string, { total: number; count: number }>();
-  (ratings ?? []).forEach((r) => {
-    const opdId = permohonanOpdMap.get(r.permohonan_id);
-    if (!opdId) return;
-    const cur = ratingByOpd.get(opdId) ?? { total: 0, count: 0 };
-    cur.total += r.skor;
-    cur.count += 1;
-    ratingByOpd.set(opdId, cur);
+  ((ratingRows ?? []) as Array<{ opd_id: string; total_rating: number; jumlah_rating: number }>).forEach((r) => {
+    if (!r.opd_id) return;
+    ratingByOpd.set(r.opd_id, { total: Number(r.total_rating) || 0, count: Number(r.jumlah_rating) || 0 });
   });
 
   // 4. Aggregate rows per OPD
