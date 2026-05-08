@@ -611,6 +611,31 @@ export type Database = {
           total_hari_selesai: number
         }[]
       }
+      opd_rating_agg: {
+        Args: never
+        Returns: {
+          jumlah_rating: number
+          opd_id: string
+          total_rating: number
+        }[]
+      }
+      rating_list_admin: {
+        Args: never
+        Returns: {
+          created_at: string
+          komentar: string
+          opd_id: string
+          opd_nama: string
+          opd_singkatan: string
+          pemohon_nama: string
+          permohonan_id: string
+          permohonan_judul: string
+          permohonan_kode: string
+          rating_id: string
+          skor: number
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "warga" | "admin_opd" | "super_admin"
