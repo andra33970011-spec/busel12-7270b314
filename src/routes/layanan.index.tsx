@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { PageShell, PageHero } from "@/components/site/PageShell";
 import { LayananOpdPageSkeleton } from "@/components/site/Skeletons";
 import { FileText, Search, LayoutGrid } from "lucide-react";
-import { layananAllWithOpdQueryOptions } from "@/lib/queries";
+import { layananAllWithOpdQueryOptions, opdListQueryOptions, layananCountByOpdQueryOptions } from "@/lib/queries";
 
 export const Route = createFileRoute("/layanan/")({
   head: () => ({
@@ -17,6 +17,8 @@ export const Route = createFileRoute("/layanan/")({
   }),
   loader: ({ context: { queryClient } }) => {
     queryClient.ensureQueryData(layananAllWithOpdQueryOptions());
+    queryClient.ensureQueryData(opdListQueryOptions());
+    queryClient.ensureQueryData(layananCountByOpdQueryOptions());
   },
   pendingComponent: LayananOpdPageSkeleton,
   component: LayananPage,
