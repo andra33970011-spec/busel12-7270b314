@@ -54,8 +54,8 @@ export function RatingForm({ permohonanId, pemohonId, sudahRating, onRatingSubmi
         Seberapa puas Anda dengan layanan ini?
       </p>
 
-      <div className="mt-3 flex gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
+      <div className="mt-3 flex flex-wrap gap-1">
+        {Array.from({ length: 10 }, (_, i) => i + 1).map((star) => (
           <button
             key={star}
             type="button"
@@ -65,7 +65,7 @@ export function RatingForm({ permohonanId, pemohonId, sudahRating, onRatingSubmi
             className="focus:outline-none"
           >
             <Star
-              className={`h-8 w-8 transition-all ${
+              className={`h-7 w-7 transition-all ${
                 (hover || skor) >= star
                   ? "fill-gold text-gold"
                   : "text-muted-foreground"
@@ -74,6 +74,9 @@ export function RatingForm({ permohonanId, pemohonId, sudahRating, onRatingSubmi
           </button>
         ))}
       </div>
+      {skor > 0 && (
+        <div className="mt-2 text-xs text-muted-foreground">{skor}/10 bintang</div>
+      )}
 
       <textarea
         rows={3}
