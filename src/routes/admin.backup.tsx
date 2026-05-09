@@ -216,7 +216,7 @@ function BackupPage() {
 
         {lastReport && (
           <div className="mt-4 overflow-hidden rounded-md border border-border">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[640px] text-sm">
               <thead className="bg-muted/50 text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2 text-left">Tabel</th>

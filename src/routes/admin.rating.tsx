@@ -153,7 +153,7 @@ function RatingPage() {
             className="h-9 rounded-md border border-border bg-background px-2 text-sm"
           >
             <option value="__all__">Semua skor</option>
-            {[5, 4, 3, 2, 1].map((s) => (
+            {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((s) => (
               <option key={s} value={String(s)}>{s} bintang</option>
             ))}
           </select>
@@ -173,14 +173,14 @@ function RatingPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                      {Array.from({ length: 10 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-4 w-4 ${i < r.skor ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`}
+                          className={`h-3.5 w-3.5 ${i < r.skor ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`}
                         />
                       ))}
                     </div>
-                    <span className="font-semibold">{r.skor}/5</span>
+                    <span className="font-semibold">{r.skor}/10</span>
                     {r.opd_singkatan && (
                       <span className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary">
                         {r.opd_singkatan}

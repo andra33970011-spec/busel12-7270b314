@@ -229,7 +229,7 @@ function DataPage() {
             <a href="#" className="text-sm font-medium text-primary hover:underline">Jelajahi katalog →</a>
           </div>
           <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[640px] text-sm">
               <thead className="bg-surface text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
                   <th className="px-5 py-3">Dataset</th>

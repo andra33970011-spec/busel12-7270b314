@@ -3,11 +3,11 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
-  ArrowRight, ShieldCheck, Database, Users, Megaphone, Search, LayoutGrid,
+  ArrowRight, ShieldCheck, Database, Users, Megaphone, Search, Building2,
 } from "lucide-react";
 import { PageShell } from "@/components/site/PageShell";
 import { HomeLayananSkeleton } from "@/components/site/Skeletons";
-import { layananHomeQueryOptions, homeStatsQueryOptions } from "@/lib/queries";
+import { homeStatsQueryOptions, opdListQueryOptions, layananCountByOpdQueryOptions } from "@/lib/queries";
 import heroImg from "@/assets/hero-city.jpg";
 
 export const Route = createFileRoute("/")({
@@ -20,7 +20,8 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: ({ context: { queryClient } }) => {
-    queryClient.prefetchQuery(layananHomeQueryOptions());
+    queryClient.prefetchQuery(opdListQueryOptions());
+    queryClient.prefetchQuery(layananCountByOpdQueryOptions());
     queryClient.prefetchQuery(homeStatsQueryOptions());
   },
   component: HomePage,
@@ -52,37 +53,56 @@ function StatsGrid() {
   );
 }
 
-function LayananGrid() {
-  const { data: layanan } = useSuspenseQuery(layananHomeQueryOptions());
+function inisial(s: string) {
+  const t = s.replace(/[^A-Za-z0-9 ]/g, "").trim();
+  if (!t) return "?";
+  const parts = t.split(/\s+/).slice(0, 2);
+  return parts.map((p) => p[0]?.toUpperCase()).join("");
+}
 
-  if (layanan.length === 0) {
+function DirektoriOpdGrid() {
+  const { data: opdList } = useSuspenseQuery(opdListQueryOptions());
+  const { data: counts } = useSuspenseQuery(layananCountByOpdQueryOptions());
+
+  if (opdList.length === 0) {
     return (
       <div className="mt-10 rounded-2xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">
-        Belum ada layanan publik yang aktif.
+        Belum ada OPD yang terdaftar.
       </div>
     );
   }
 
   return (
-    <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {layanan.map((s) => (
-        <motion.div key={s.id} whileHover={{ y: -4 }}>
-          <Link
-            to="/layanan/$slug"
-            params={{ slug: s.slug }}
-            className="group block h-full rounded-2xl border border-border bg-card p-6 shadow-soft transition-shadow hover:shadow-elevated"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
-              <LayoutGrid className="h-6 w-6" />
-            </div>
-            <h3 className="mt-5 text-lg font-semibold">{s.judul}</h3>
-            {s.deskripsi && <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{s.deskripsi}</p>}
-            <div className="mt-5 inline-flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
-              Akses layanan <ArrowRight className="h-4 w-4" />
-            </div>
-          </Link>
-        </motion.div>
-      ))}
+    <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {opdList.map((o) => {
+        const jml = counts[o.id] ?? 0;
+        return (
+          <motion.div key={o.id} whileHover={{ y: -4 }}>
+            <Link
+              to="/instansi/$singkatan"
+              params={{ singkatan: o.singkatan }}
+              search={{ page: 1 }}
+              className="group flex h-full gap-4 rounded-2xl border border-border bg-card p-5 shadow-soft transition-shadow hover:shadow-elevated"
+            >
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground font-display text-lg font-bold shadow-soft">
+                {inisial(o.singkatan)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {o.singkatan}
+                </div>
+                <h3 className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+                  {o.nama}
+                </h3>
+                <div className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                  <Building2 className="h-3 w-3" />
+                  {jml} layanan
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
@@ -112,7 +132,7 @@ function HomePage() {
               <ShieldCheck className="h-3.5 w-3.5" /> Portal Resmi Pemerintah
             </span>
             <h1 className="mt-5 text-balance text-4xl font-bold leading-tight md:text-6xl">
-              Satu Portal,<br />Satu Data,<br /><span className="text-gold">Satu Pelayanan.</span>
+              Satu Pintu,<br />Satu Data,<br /><span className="text-gold">Satu Pelayanan.</span>
             </h1>
             <p className="mt-5 max-w-xl text-base text-white/85 md:text-lg">
               Akses seluruh layanan publik Kabupaten Buton Selatan dan data pemerintah terpadu dalam satu tempat — cepat, transparan, dan terverifikasi.
@@ -157,20 +177,21 @@ function HomePage() {
         </div>
       </section>
 
-      {/* LAYANAN UTAMA — sinkron dengan database */}
+      {/* DIREKTORI OPD — sinkron dengan database */}
       <section className="container-page py-16 md:py-24">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-widest text-accent">Layanan Publik</div>
-            <h2 className="mt-2 text-3xl font-bold md:text-4xl">Akses cepat layanan terpadu</h2>
+            <div className="text-xs font-semibold uppercase tracking-widest text-accent">Direktori OPD</div>
+            <h2 className="mt-2 text-3xl font-bold md:text-4xl">Dinas & Perangkat Daerah</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Kenali setiap OPD dan layanan yang dikelolanya.</p>
           </div>
           <Link to="/layanan" className="hidden text-sm font-medium text-primary hover:underline md:inline-flex">
-            Lihat semua →
+            Lihat semua layanan →
           </Link>
         </div>
 
         <Suspense fallback={<HomeLayananSkeleton />}>
-          <LayananGrid />
+          <DirektoriOpdGrid />
         </Suspense>
 
         <div className="mt-8 text-center md:hidden">
