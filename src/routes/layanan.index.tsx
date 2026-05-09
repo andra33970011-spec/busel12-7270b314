@@ -106,7 +106,10 @@ function LayananPage() {
                           : "hover:bg-muted"
                       }`}
                     >
-                      <div className="font-medium">{o.singkatan}</div>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="font-medium">{o.singkatan}</div>
+                        <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${opdAktif === o.id ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{o.jumlah}</span>
+                      </div>
                       <div className={`text-[11px] truncate ${opdAktif === o.id ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{o.nama}</div>
                     </button>
                   </li>
