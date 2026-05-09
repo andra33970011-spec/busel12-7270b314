@@ -72,7 +72,7 @@ export const homeStatsQueryOptions = () =>
 
       const ratings = (ratingRes.data ?? []) as { skor: number }[];
       const avg = ratings.length > 0 ? ratings.reduce((s, r) => s + r.skor, 0) / ratings.length : null;
-      const kepuasanPersen = avg !== null ? (avg / 5) * 100 : null;
+      const kepuasanPersen = avg !== null ? (avg / 10) * 100 : null;
 
       return {
         layananOnline: layananRes.count ?? 0,
