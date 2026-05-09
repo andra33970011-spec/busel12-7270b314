@@ -60,7 +60,7 @@ function AuditPage() {
       <h1 className="mb-1 font-display text-2xl font-bold">Audit Log</h1>
       <p className="mb-4 text-sm text-muted-foreground">200 aksi terbaru pada sistem.</p>
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-soft">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Waktu</th>

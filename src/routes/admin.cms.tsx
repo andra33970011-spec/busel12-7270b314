@@ -94,7 +94,7 @@ function BeritaTab() {
         </button>
       </div>
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-soft">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Judul</th>
@@ -194,7 +194,7 @@ function LayananTab() {
         </button>
       </div>
       <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-soft">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
               <th className="px-4 py-3 font-medium">Judul</th>

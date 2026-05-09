@@ -231,7 +231,7 @@ function KinerjaOpdPage() {
         {/* Tabel Detail per OPD */}
         <div className="mt-10 overflow-x-auto rounded-xl border border-border bg-card shadow-soft">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full min-w-[640px] text-sm">
               <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">OPD</th>
