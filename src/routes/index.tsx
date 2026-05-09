@@ -81,6 +81,7 @@ function DirektoriOpdGrid() {
             <Link
               to="/instansi/$singkatan"
               params={{ singkatan: o.singkatan }}
+              search={{ page: 1 }}
               className="group flex h-full gap-4 rounded-2xl border border-border bg-card p-5 shadow-soft transition-shadow hover:shadow-elevated"
             >
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-primary text-primary-foreground font-display text-lg font-bold shadow-soft">
