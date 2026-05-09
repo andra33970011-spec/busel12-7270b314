@@ -76,7 +76,7 @@ function OpdPage() {
         </button>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-soft">
         <table className="w-full text-sm">
           <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>

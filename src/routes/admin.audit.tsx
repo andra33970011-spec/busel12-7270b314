@@ -59,7 +59,7 @@ function AuditPage() {
     <AdminShell breadcrumb={[{ label: "Audit Log" }]}>
       <h1 className="mb-1 font-display text-2xl font-bold">Audit Log</h1>
       <p className="mb-4 text-sm text-muted-foreground">200 aksi terbaru pada sistem.</p>
-      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+      <div className="overflow-x-auto rounded-xl border border-border bg-card shadow-soft">
         <table className="w-full text-sm">
           <thead className="bg-surface text-left text-xs uppercase tracking-wide text-muted-foreground">
             <tr>
