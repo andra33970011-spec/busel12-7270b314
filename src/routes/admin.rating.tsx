@@ -173,14 +173,14 @@ function RatingPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="flex items-center gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
+                      {Array.from({ length: 10 }).map((_, i) => (
                         <Star
                           key={i}
-                          className={`h-4 w-4 ${i < r.skor ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`}
+                          className={`h-3.5 w-3.5 ${i < r.skor ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`}
                         />
                       ))}
                     </div>
-                    <span className="font-semibold">{r.skor}/5</span>
+                    <span className="font-semibold">{r.skor}/10</span>
                     {r.opd_singkatan && (
                       <span className="rounded-md bg-primary-soft px-2 py-0.5 text-[10px] font-semibold text-primary">
                         {r.opd_singkatan}
