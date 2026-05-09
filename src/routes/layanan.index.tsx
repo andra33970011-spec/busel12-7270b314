@@ -26,17 +26,17 @@ export const Route = createFileRoute("/layanan/")({
 
 function LayananPage() {
   const { data: layanan } = useSuspenseQuery(layananAllWithOpdQueryOptions());
+  const { data: allOpd } = useSuspenseQuery(opdListQueryOptions());
+  const { data: counts } = useSuspenseQuery(layananCountByOpdQueryOptions());
   const [q, setQ] = useState("");
   const [opdAktif, setOpdAktif] = useState<string>("__all__");
 
-  // kumpulkan semua dinas unik dari layanan
+  // Sumber: SEMUA OPD dari sistem (sinkron dengan dashboard admin)
   const opdList = useMemo(() => {
-    const map = new Map<string, { id: string; singkatan: string; nama: string }>();
-    for (const l of layanan) {
-      if (l.opd) map.set(l.opd.id, { id: l.opd.id, singkatan: l.opd.singkatan, nama: l.opd.nama });
-    }
-    return Array.from(map.values()).sort((a, b) => a.singkatan.localeCompare(b.singkatan, "id"));
-  }, [layanan]);
+    return [...allOpd]
+      .map((o) => ({ id: o.id, singkatan: o.singkatan, nama: o.nama, jumlah: counts[o.id] ?? 0 }))
+      .sort((a, b) => a.singkatan.localeCompare(b.singkatan, "id"));
+  }, [allOpd, counts]);
 
   const filtered = useMemo(() => {
     const kw = q.trim().toLowerCase();
