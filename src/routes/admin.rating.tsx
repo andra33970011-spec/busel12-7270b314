@@ -153,7 +153,7 @@ function RatingPage() {
             className="h-9 rounded-md border border-border bg-background px-2 text-sm"
           >
             <option value="__all__">Semua skor</option>
-            {[5, 4, 3, 2, 1].map((s) => (
+            {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map((s) => (
               <option key={s} value={String(s)}>{s} bintang</option>
             ))}
           </select>
