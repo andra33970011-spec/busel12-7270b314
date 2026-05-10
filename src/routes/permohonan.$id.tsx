@@ -42,7 +42,7 @@ type Permohonan = {
   opd: { nama: string; singkatan: string } | null;
   profiles: { nama_lengkap: string; nik: string | null; no_hp: string | null } | null;
 };
-type Riwayat = { id: string; ts?: string; created_at: string; aksi: string; catatan: string | null; oleh: string | null };
+type Riwayat = { id: string; ts?: string; created_at: string; aksi: string; catatan: string | null; oleh: string | null; nama_petugas?: string | null; email_petugas?: string | null };
 type Berkas = { name: string; size: number };
 
 function DetailPermohonan() {
@@ -90,12 +90,20 @@ function DetailPermohonan() {
       setItem(merged);
       setStatusBaru((row as { status: StatusPermohonan }).status);
 
-      const { data: rws } = await supabase
-        .from("permohonan_riwayat")
-        .select("id,created_at,aksi,catatan,oleh")
-        .eq("permohonan_id", id)
-        .order("created_at", { ascending: true });
-      setRiwayat((rws ?? []) as Riwayat[]);
+      // Riwayat dengan info petugas (nama + email) via RPC
+      const { data: rws, error: rwsErr } = await supabase
+        .rpc("riwayat_dengan_petugas", { _permohonan_id: id });
+      if (rwsErr) {
+        // Fallback ke tabel mentah jika RPC belum tersedia
+        const { data: raw } = await supabase
+          .from("permohonan_riwayat")
+          .select("id,created_at,aksi,catatan,oleh")
+          .eq("permohonan_id", id)
+          .order("created_at", { ascending: true });
+        setRiwayat((raw ?? []) as Riwayat[]);
+      } else {
+        setRiwayat((rws ?? []) as Riwayat[]);
+      }
 
       // List berkas: <pemohonId>/<permohonanId>/
       const folder = `${(row as { pemohon_id: string }).pemohon_id}/${id}`;
@@ -278,6 +286,12 @@ function DetailPermohonan() {
                   <div className="text-xs text-muted-foreground">
                     <Clock className="mr-1 inline h-3 w-3" />
                     {fmtDateTime(r.created_at)}
+                    {r.nama_petugas && (
+                      <span className="ml-2">
+                        · oleh <strong className="text-foreground">{r.nama_petugas}</strong>
+                        {r.email_petugas && <span className="text-muted-foreground"> ({r.email_petugas})</span>}
+                      </span>
+                    )}
                   </div>
                   {r.catatan && <div className="mt-1 text-sm text-surface-foreground">{r.catatan}</div>}
                 </li>

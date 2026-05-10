@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { PageShell, PageHero } from "@/components/site/PageShell";
-import { MapPin, Phone, Mail, Clock, MessageSquare } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, MessageSquare, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/kontak")({
   head: () => ({
@@ -14,7 +17,46 @@ export const Route = createFileRoute("/kontak")({
   component: KontakPage,
 });
 
+const KATEGORI = [
+  "Infrastruktur & Jalan",
+  "Kebersihan & Sampah",
+  "Pelayanan Publik",
+  "Kesehatan",
+  "Pendidikan",
+  "Lainnya",
+];
+
 function KontakPage() {
+  const [form, setForm] = useState({
+    nama: "", nik: "", email: "", no_hp: "",
+    kategori: KATEGORI[0], lokasi: "", uraian: "",
+  });
+  const [busy, setBusy] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.nama || !form.email || !form.uraian) return toast.error("Lengkapi data wajib");
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("laporan_masyarakat").insert({
+        nama: form.nama,
+        nik: form.nik || null,
+        email: form.email,
+        no_hp: form.no_hp || null,
+        kategori: form.kategori,
+        lokasi: form.lokasi || null,
+        uraian: form.uraian,
+      });
+      if (error) throw error;
+      toast.success("Laporan terkirim! Tim kami akan menindaklanjuti.");
+      setForm({ nama: "", nik: "", email: "", no_hp: "", kategori: KATEGORI[0], lokasi: "", uraian: "" });
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <PageShell>
       <PageHero
@@ -25,7 +67,6 @@ function KontakPage() {
 
       <section className="container-page py-14">
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Info */}
           <div className="space-y-4">
             {[
               { icon: MapPin, title: "Alamat", value: "Balai Kota, Jl. Merdeka No. 1\nKabupaten Buton Selatan 16110" },
@@ -47,11 +88,7 @@ function KontakPage() {
             ))}
           </div>
 
-          {/* Form LAPOR! */}
-          <form
-            onSubmit={(e) => { e.preventDefault(); alert("Laporan terkirim! Tim kami akan menindaklanjuti."); }}
-            className="rounded-3xl border border-border bg-card p-8 shadow-elevated lg:col-span-2"
-          >
+          <form onSubmit={onSubmit} className="rounded-3xl border border-border bg-card p-8 shadow-elevated lg:col-span-2">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-primary text-primary-foreground">
                 <MessageSquare className="h-5 w-5" />
@@ -63,32 +100,28 @@ function KontakPage() {
             </div>
 
             <div className="mt-6 grid gap-4 md:grid-cols-2">
-              <Field label="Nama Lengkap"><input required className="input" placeholder="Nama sesuai KTP" /></Field>
-              <Field label="NIK"><input required className="input" placeholder="16 digit NIK" /></Field>
-              <Field label="Email"><input required type="email" className="input" placeholder="email@contoh.com" /></Field>
-              <Field label="No. Telepon"><input required className="input" placeholder="08xx-xxxx-xxxx" /></Field>
+              <Field label="Nama Lengkap"><input required className="input" value={form.nama} onChange={(e) => setForm({ ...form, nama: e.target.value })} placeholder="Nama sesuai KTP" /></Field>
+              <Field label="NIK"><input className="input" value={form.nik} onChange={(e) => setForm({ ...form, nik: e.target.value })} placeholder="16 digit NIK (opsional)" /></Field>
+              <Field label="Email"><input required type="email" className="input" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="email@contoh.com" /></Field>
+              <Field label="No. Telepon"><input className="input" value={form.no_hp} onChange={(e) => setForm({ ...form, no_hp: e.target.value })} placeholder="08xx-xxxx-xxxx" /></Field>
               <Field label="Kategori" className="md:col-span-2">
-                <select className="input">
-                  <option>Infrastruktur & Jalan</option>
-                  <option>Kebersihan & Sampah</option>
-                  <option>Pelayanan Publik</option>
-                  <option>Kesehatan</option>
-                  <option>Pendidikan</option>
-                  <option>Lainnya</option>
+                <select className="input" value={form.kategori} onChange={(e) => setForm({ ...form, kategori: e.target.value })}>
+                  {KATEGORI.map((k) => <option key={k}>{k}</option>)}
                 </select>
               </Field>
               <Field label="Lokasi Kejadian" className="md:col-span-2">
-                <input className="input" placeholder="Kelurahan, kecamatan, atau alamat" />
+                <input className="input" value={form.lokasi} onChange={(e) => setForm({ ...form, lokasi: e.target.value })} placeholder="Kelurahan, kecamatan, atau alamat" />
               </Field>
               <Field label="Uraian Laporan" className="md:col-span-2">
-                <textarea required rows={5} className="input resize-none" placeholder="Jelaskan secara rinci…" />
+                <textarea required rows={5} className="input resize-none" value={form.uraian} onChange={(e) => setForm({ ...form, uraian: e.target.value })} placeholder="Jelaskan secara rinci…" />
               </Field>
             </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <p className="text-xs text-muted-foreground">Data Anda dilindungi sesuai UU Perlindungan Data Pribadi.</p>
-              <button className="inline-flex h-12 items-center rounded-md bg-gradient-primary px-7 text-sm font-semibold text-primary-foreground shadow-soft">
-                Kirim Laporan
+              <button disabled={busy} className="inline-flex h-12 items-center gap-2 rounded-md bg-gradient-primary px-7 text-sm font-semibold text-primary-foreground shadow-soft disabled:opacity-60">
+                {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+                {busy ? "Mengirim…" : "Kirim Laporan"}
               </button>
             </div>
           </form>

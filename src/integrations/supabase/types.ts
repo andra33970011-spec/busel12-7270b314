@@ -257,6 +257,65 @@ export type Database = {
         }
         Relationships: []
       }
+      laporan_masyarakat: {
+        Row: {
+          created_at: string
+          ditangani_oleh: string | null
+          email: string
+          id: string
+          kategori: string
+          lokasi: string | null
+          nama: string
+          nik: string | null
+          no_hp: string | null
+          opd_id: string | null
+          status: string
+          tindak_lanjut: string | null
+          updated_at: string
+          uraian: string
+        }
+        Insert: {
+          created_at?: string
+          ditangani_oleh?: string | null
+          email: string
+          id?: string
+          kategori: string
+          lokasi?: string | null
+          nama: string
+          nik?: string | null
+          no_hp?: string | null
+          opd_id?: string | null
+          status?: string
+          tindak_lanjut?: string | null
+          updated_at?: string
+          uraian: string
+        }
+        Update: {
+          created_at?: string
+          ditangani_oleh?: string | null
+          email?: string
+          id?: string
+          kategori?: string
+          lokasi?: string | null
+          nama?: string
+          nik?: string | null
+          no_hp?: string | null
+          opd_id?: string | null
+          status?: string
+          tindak_lanjut?: string | null
+          updated_at?: string
+          uraian?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "laporan_masyarakat_opd_id_fkey"
+            columns: ["opd_id"]
+            isOneToOne: false
+            referencedRelation: "opd"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       layanan_publik: {
         Row: {
           aktif: boolean
@@ -634,6 +693,18 @@ export type Database = {
           rating_id: string
           skor: number
           user_id: string
+        }[]
+      }
+      riwayat_dengan_petugas: {
+        Args: { _permohonan_id: string }
+        Returns: {
+          aksi: string
+          catatan: string
+          created_at: string
+          email_petugas: string
+          id: string
+          nama_petugas: string
+          oleh: string
         }[]
       }
     }
