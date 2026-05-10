@@ -90,12 +90,20 @@ function DetailPermohonan() {
       setItem(merged);
       setStatusBaru((row as { status: StatusPermohonan }).status);
 
-      const { data: rws } = await supabase
-        .from("permohonan_riwayat")
-        .select("id,created_at,aksi,catatan,oleh")
-        .eq("permohonan_id", id)
-        .order("created_at", { ascending: true });
-      setRiwayat((rws ?? []) as Riwayat[]);
+      // Riwayat dengan info petugas (nama + email) via RPC
+      const { data: rws, error: rwsErr } = await supabase
+        .rpc("riwayat_dengan_petugas", { _permohonan_id: id });
+      if (rwsErr) {
+        // Fallback ke tabel mentah jika RPC belum tersedia
+        const { data: raw } = await supabase
+          .from("permohonan_riwayat")
+          .select("id,created_at,aksi,catatan,oleh")
+          .eq("permohonan_id", id)
+          .order("created_at", { ascending: true });
+        setRiwayat((raw ?? []) as Riwayat[]);
+      } else {
+        setRiwayat((rws ?? []) as Riwayat[]);
+      }
 
       // List berkas: <pemohonId>/<permohonanId>/
       const folder = `${(row as { pemohon_id: string }).pemohon_id}/${id}`;
