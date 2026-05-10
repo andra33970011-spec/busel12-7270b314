@@ -29,6 +29,7 @@ import { Route as AdminStorageRouteImport } from './routes/admin.storage'
 import { Route as AdminRatingRouteImport } from './routes/admin.rating'
 import { Route as AdminPejabatRouteImport } from './routes/admin.pejabat'
 import { Route as AdminOpdRouteImport } from './routes/admin.opd'
+import { Route as AdminLayananRouteImport } from './routes/admin.layanan'
 import { Route as AdminLaporanRouteImport } from './routes/admin.laporan'
 import { Route as AdminDataTerpaduRouteImport } from './routes/admin.data-terpadu'
 import { Route as AdminConfigRouteImport } from './routes/admin.config'
@@ -136,6 +137,11 @@ const AdminOpdRoute = AdminOpdRouteImport.update({
   path: '/admin/opd',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLayananRoute = AdminLayananRouteImport.update({
+  id: '/admin/layanan',
+  path: '/admin/layanan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLaporanRoute = AdminLaporanRouteImport.update({
   id: '/admin/laporan',
   path: '/admin/laporan',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/admin/config': typeof AdminConfigRoute
   '/admin/data-terpadu': typeof AdminDataTerpaduRoute
   '/admin/laporan': typeof AdminLaporanRoute
+  '/admin/layanan': typeof AdminLayananRoute
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
   '/admin/rating': typeof AdminRatingRoute
@@ -210,6 +217,7 @@ export interface FileRoutesByTo {
   '/admin/config': typeof AdminConfigRoute
   '/admin/data-terpadu': typeof AdminDataTerpaduRoute
   '/admin/laporan': typeof AdminLaporanRoute
+  '/admin/layanan': typeof AdminLayananRoute
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
   '/admin/rating': typeof AdminRatingRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/admin/config': typeof AdminConfigRoute
   '/admin/data-terpadu': typeof AdminDataTerpaduRoute
   '/admin/laporan': typeof AdminLaporanRoute
+  '/admin/layanan': typeof AdminLayananRoute
   '/admin/opd': typeof AdminOpdRoute
   '/admin/pejabat': typeof AdminPejabatRoute
   '/admin/rating': typeof AdminRatingRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin/config'
     | '/admin/data-terpadu'
     | '/admin/laporan'
+    | '/admin/layanan'
     | '/admin/opd'
     | '/admin/pejabat'
     | '/admin/rating'
@@ -297,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin/config'
     | '/admin/data-terpadu'
     | '/admin/laporan'
+    | '/admin/layanan'
     | '/admin/opd'
     | '/admin/pejabat'
     | '/admin/rating'
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/admin/config'
     | '/admin/data-terpadu'
     | '/admin/laporan'
+    | '/admin/layanan'
     | '/admin/opd'
     | '/admin/pejabat'
     | '/admin/rating'
@@ -354,6 +366,7 @@ export interface RootRouteChildren {
   AdminConfigRoute: typeof AdminConfigRoute
   AdminDataTerpaduRoute: typeof AdminDataTerpaduRoute
   AdminLaporanRoute: typeof AdminLaporanRoute
+  AdminLayananRoute: typeof AdminLayananRoute
   AdminOpdRoute: typeof AdminOpdRoute
   AdminPejabatRoute: typeof AdminPejabatRoute
   AdminRatingRoute: typeof AdminRatingRoute
@@ -510,6 +523,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOpdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/layanan': {
+      id: '/admin/layanan'
+      path: '/admin/layanan'
+      fullPath: '/admin/layanan'
+      preLoaderRoute: typeof AdminLayananRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/laporan': {
       id: '/admin/laporan'
       path: '/admin/laporan'
@@ -570,6 +590,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminConfigRoute: AdminConfigRoute,
   AdminDataTerpaduRoute: AdminDataTerpaduRoute,
   AdminLaporanRoute: AdminLaporanRoute,
+  AdminLayananRoute: AdminLayananRoute,
   AdminOpdRoute: AdminOpdRoute,
   AdminPejabatRoute: AdminPejabatRoute,
   AdminRatingRoute: AdminRatingRoute,
