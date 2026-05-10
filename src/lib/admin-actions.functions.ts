@@ -21,6 +21,28 @@ async function assertSuperAdmin(userId: string) {
   if (!data) throw new Error("Forbidden: super admin only");
 }
 
+// Returns: { isSuper: boolean, opdId: string | null }
+async function assertAdminOrSuper(userId: string) {
+  const { data: roles } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  const r = (roles ?? []).map((x) => x.role);
+  const isSuper = r.includes("super_admin");
+  const isOpd = r.includes("admin_opd");
+  if (!isSuper && !isOpd) throw new Error("Forbidden: admin only");
+  let opdId: string | null = null;
+  if (isOpd) {
+    const { data: prof } = await supabaseAdmin
+      .from("profiles")
+      .select("opd_id")
+      .eq("id", userId)
+      .maybeSingle();
+    opdId = (prof?.opd_id as string | null) ?? null;
+  }
+  return { isSuper, opdId };
+}
+
 function slugify(s: string) {
   return s
     .toLowerCase()
