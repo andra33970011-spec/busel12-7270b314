@@ -437,15 +437,30 @@ export const upsertLayanan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => layananSchema.parse(input))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const ctx = await assertAdminOrSuper(context.userId);
     const rl = await checkRateLimit(context.userId, "layanan_write", 30, 60);
     if (!rl.ok) throw new Error("Too many requests");
+
+    // Admin OPD wajib pakai opd_id miliknya
+    let opdId = data.opd_id ?? null;
+    if (!ctx.isSuper) {
+      if (!ctx.opdId) throw new Error("Akun admin OPD belum memiliki OPD");
+      opdId = ctx.opdId;
+      if (data.id) {
+        const { data: existing } = await supabaseAdmin
+          .from("layanan_publik").select("opd_id").eq("id", data.id).maybeSingle();
+        if (!existing || existing.opd_id !== ctx.opdId) {
+          throw new Error("Forbidden: layanan bukan milik OPD Anda");
+        }
+      }
+    }
+
     const payload = {
       judul: data.judul,
       slug: slugify(data.judul),
       deskripsi: data.deskripsi ?? null,
       ikon: data.ikon ?? null,
-      opd_id: data.opd_id ?? null,
+      opd_id: opdId,
       persyaratan: data.persyaratan ?? null,
       alur: data.alur ?? null,
       aktif: data.aktif,
@@ -466,7 +481,14 @@ export const deleteLayanan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertSuperAdmin(context.userId);
+    const ctx = await assertAdminOrSuper(context.userId);
+    if (!ctx.isSuper) {
+      const { data: existing } = await supabaseAdmin
+        .from("layanan_publik").select("opd_id").eq("id", data.id).maybeSingle();
+      if (!existing || existing.opd_id !== ctx.opdId) {
+        throw new Error("Forbidden: layanan bukan milik OPD Anda");
+      }
+    }
     const { error } = await supabaseAdmin.from("layanan_publik").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
