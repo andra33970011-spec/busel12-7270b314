@@ -286,6 +286,12 @@ function DetailPermohonan() {
                   <div className="text-xs text-muted-foreground">
                     <Clock className="mr-1 inline h-3 w-3" />
                     {fmtDateTime(r.created_at)}
+                    {r.nama_petugas && (
+                      <span className="ml-2">
+                        · oleh <strong className="text-foreground">{r.nama_petugas}</strong>
+                        {r.email_petugas && <span className="text-muted-foreground"> ({r.email_petugas})</span>}
+                      </span>
+                    )}
                   </div>
                   {r.catatan && <div className="mt-1 text-sm text-surface-foreground">{r.catatan}</div>}
                 </li>
