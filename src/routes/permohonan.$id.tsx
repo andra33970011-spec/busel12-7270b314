@@ -42,7 +42,7 @@ type Permohonan = {
   opd: { nama: string; singkatan: string } | null;
   profiles: { nama_lengkap: string; nik: string | null; no_hp: string | null } | null;
 };
-type Riwayat = { id: string; ts?: string; created_at: string; aksi: string; catatan: string | null; oleh: string | null };
+type Riwayat = { id: string; ts?: string; created_at: string; aksi: string; catatan: string | null; oleh: string | null; nama_petugas?: string | null; email_petugas?: string | null };
 type Berkas = { name: string; size: number };
 
 function DetailPermohonan() {
